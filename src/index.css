@@ -1,0 +1,240 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('/fonts/NotoSansKR-Regular.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('/fonts/NotoSansKR-Medium.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Sans KR';
+  src: url('/fonts/NotoSansKR-SemiBold.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Serif KR';
+  src: url('/fonts/NotoSerifKR-Regular.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Noto Serif KR';
+  src: url('/fonts/NotoSerifKR-SemiBold.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+}
+
+:root {
+  font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color-scheme: light;
+
+  --color-bg: #f4f5f7;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f6f7fb;
+  --color-input-bg: #ffffff;
+  --color-text-primary: #1c1c1e;
+  --color-text-secondary: #5b5d63;
+  --color-muted: #7a7f91;
+  --color-footer-text: #5b5d63;
+  --color-empty: #5d616b;
+  --color-border: #d7dae0;
+  --color-divider: #e3e5e8;
+  --color-accent: #2c5be8;
+  --color-accent-strong: #2449bb;
+  --color-verse-hover: #f0f4ff;
+  --color-highlight: #fbe6a2;
+  --color-result-bg: #f6f7fb;
+  --color-result-hover: #edf1ff;
+  --color-result-border: #b7c7ff;
+  --color-badge-bg: #e6ecff;
+  --color-badge-text: #294477;
+  --color-badge-ok-bg: #e1f8e7;
+  --color-badge-ok-text: #246b43;
+  --color-badge-error-bg: #fde5e5;
+  --color-badge-error-text: #ae2d2d;
+  --shadow-soft: 0 12px 32px rgba(15, 23, 42, 0.05);
+  --shadow-strong: 0 18px 40px rgba(15, 23, 42, 0.06);
+  --font-ui: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
+  --font-heading: 'Noto Serif KR', 'Apple SD Gothic Neo', 'Malgun Gothic', serif;
+  --font-reading: 'Noto Serif KR', 'Apple SD Gothic Neo', 'Malgun Gothic', serif;
+  --reader-font-scale: 1;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-bg: #0f1118;
+  --color-surface: #161922;
+  --color-surface-alt: #202635;
+  --color-input-bg: #1c2233;
+  --color-text-primary: #f5f7ff;
+  --color-text-secondary: #b3b8cb;
+  --color-muted: #8b92ad;
+  --color-footer-text: #a9afc4;
+  --color-empty: #a1a7c0;
+  --color-border: #2d3242;
+  --color-divider: #242a3a;
+  --color-accent: #7aa6ff;
+  --color-accent-strong: #517ad6;
+  --color-verse-hover: #28324a;
+  --color-highlight: #38445c;
+  --color-result-bg: #202635;
+  --color-result-hover: #273047;
+  --color-result-border: #425377;
+  --color-badge-bg: #1f2f4a;
+  --color-badge-text: #a8c4ff;
+  --color-badge-ok-bg: #173327;
+  --color-badge-ok-text: #96e4ba;
+  --color-badge-error-bg: #4a2020;
+  --color-badge-error-text: #f1a7a7;
+  --shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.45);
+  --shadow-strong: 0 18px 40px rgba(0, 0, 0, 0.55);
+  --font-ui: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
+  --font-heading: 'Noto Serif KR', 'Apple SD Gothic Neo', 'Malgun Gothic', serif;
+  --font-reading: 'Noto Serif KR', 'Apple SD Gothic Neo', 'Malgun Gothic', serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  transition: background 220ms ease, color 220ms ease;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+}
+
+input,
+select {
+  border: none;
+}
+
+button {
+  border: none;
+  background: none;
+}
+
+button:disabled {
+  opacity: 0.7;
+}
+
+::selection {
+  background: rgba(44, 91, 232, 0.28);
+  color: inherit;
+}
+
+@layer components {
+  .toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+  }
+
+  .toggle__switch {
+    position: relative;
+    display: inline-flex;
+    width: 34px;
+    height: 18px;
+    align-items: center;
+  }
+
+  .toggle__switch input {
+    appearance: none;
+    width: 100%;
+    height: 100%;
+    border-radius: 999px;
+    border: 1px solid var(--color-border);
+    background: #cbd2e0;
+    transition: background 180ms ease, border-color 180ms ease;
+    cursor: pointer;
+  }
+
+  .toggle__switch input:checked {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .toggle__indicator {
+    pointer-events: none;
+    position: absolute;
+    left: 3px;
+    top: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 180ms ease;
+  }
+
+  .toggle__switch input:checked + .toggle__indicator {
+    transform: translateX(16px);
+  }
+
+  .toggle__switch input:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent);
+  }
+
+  .toggle__label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+  }
+
+  .verse-highlight {
+    background: var(--color-highlight);
+    box-shadow: inset 0 0 0 1px rgba(44, 91, 232, 0.12);
+  }
+}
+

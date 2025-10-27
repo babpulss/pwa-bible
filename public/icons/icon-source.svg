@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">오프라인 성경 앱 아이콘</title>
+  <desc id="desc">파란 배경 위에 흰색 성경과 십자가가 있는 직관적인 아이콘</desc>
+  <!-- Background -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#3668ff"/>
+      <stop offset="100%" stop-color="#2c5be8"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="24" flood-color="#1b2f80" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+  <rect x="64" y="64" width="896" height="896" rx="192" ry="192" fill="url(#bgGrad)"/>
+
+  <!-- Book shape with subtle shadow -->
+  <g filter="url(#shadow)">
+    <path d="M256 280c0-26.51 21.49-48 48-48h416c35.35 0 64 28.65 64 64v432c0 35.35-28.65 64-64 64H336c-44.18 0-80-35.82-80-80V280z"
+          fill="#fff"/>
+    <!-- Book spine -->
+    <rect x="320" y="264" width="40" height="520" fill="#e9eefc"/>
+    <!-- Page hint -->
+    <path d="M320 744h400c22.091 0 40-17.909 40-40V304c0-22.091-17.909-40-40-40H320"
+          fill="none" stroke="#d6dffb" stroke-width="16"/>
+  </g>
+
+  <!-- Centerpiece: subtle debossed title band (no religious symbol) -->
+  <rect x="440" y="392" width="184" height="32" rx="16" fill="#dfe7fd"/>
+  <rect x="440" y="448" width="224" height="24" rx="12" fill="#e8efff"/>
+
+  <!-- Bookmark ribbon -->
+  <path d="M384 264v128l48-24 48 24V264z" fill="#f95151"/>
+</svg>
