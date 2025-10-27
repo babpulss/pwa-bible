@@ -500,7 +500,14 @@ function App() {
     runSearch(term)
   }
 
-  // 자동 재검색 제거: 사용자가 제출할 때만 수행
+  // 범위(전체/구약/신약) 변경 시에는 마지막 검색어 기준으로 즉시 재검색
+  useEffect(() => {
+    if (!showSearch) return
+    if (!koreanData) return
+    const term = lastSearchedQuery.trim()
+    if (!term) return
+    runSearch(term)
+  }, [searchScope, lastSearchedQuery, showSearch, koreanData, runSearch])
 
   const handleResultClick = (result: SearchResult) => {
     if (!koreanData) {
@@ -767,10 +774,22 @@ function App() {
       />
 
       <footer className="app-footer">
-        <p>
-          대한성서공회 개역한글 본문 (공개 저작권 안내 참고). 데이터는 최초 접속 시 한 번만
-          내려받고, 이후 오프라인에서도 사용할 수 있습니다.
-        </p>
+        <button
+          type="button"
+          className="header-button settings-toggle"
+          onClick={() => {
+            if (!showSettings) setShowSearch(false)
+            setShowSettings(true)
+            // 약간의 지연 후 정보 섹션으로 스크롤
+            setTimeout(() => {
+              const el = document.getElementById('license-info')
+              el?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            }, 50)
+          }}
+          title="설정에서 저작권/오프라인 안내 보기"
+        >
+          저작권/오프라인 안내 보기
+        </button>
       </footer>
     </div>
   )

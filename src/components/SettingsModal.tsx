@@ -117,6 +117,21 @@ export function SettingsModal(props: Props) {
             </div>
           </div>
         </div>
+        <div className="settings__row" id="license-info">
+          <div className="settings__label">정보</div>
+          <div className="settings__control">
+            <div className="settings__info">
+              <p style={{ margin: 0 }}>
+                저작권 안내: 개역한글(대한성서공회) 본문은 대한성서공회가 제공한 공개 사용 안내 범위
+                내에서 자유롭게 이용할 수 있습니다(자세한 조건은 저작권 안내 참고). King James
+                Version(KJV)은 퍼블릭 도메인으로 자유롭게 사용 및 배포할 수 있습니다.
+              </p>
+              <p style={{ margin: '0.35rem 0 0' }}>
+                데이터는 최초 접속 시 한 번 내려받아 이후 오프라인에서도 사용할 수 있습니다.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </Modal>
   )

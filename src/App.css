@@ -742,6 +742,12 @@
   align-items: center;
 }
 
+.settings__info {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 @media (max-width: 680px) {
   .settings__row {
     grid-template-columns: 1fr;
