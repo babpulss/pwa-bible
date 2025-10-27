@@ -62,7 +62,7 @@ export const useAppStore = create<AppState>()(
 
       theme: getInitialTheme(),
       manualTheme: false,
-      fontScale: 1,
+  fontScale: 1.1,
       showEnglish: true,
 
       showSearch: false,

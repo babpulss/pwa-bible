@@ -81,7 +81,7 @@
   --font-ui: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
   --font-heading: 'Noto Serif KR', 'Apple SD Gothic Neo', 'Malgun Gothic', serif;
   --font-reading: 'Noto Serif KR', 'Apple SD Gothic Neo', 'Malgun Gothic', serif;
-  --reader-font-scale: 1;
+  --reader-font-scale: 1.1;
 }
 
 [data-theme='dark'] {
