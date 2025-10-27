@@ -7,6 +7,8 @@ type Props = {
   onClose: () => void
   query: string
   setQuery: (v: string) => void
+  searchScope: 'all' | 'ot' | 'nt'
+  setSearchScope: (v: 'all' | 'ot' | 'nt') => void
   searching: boolean
   searchResults: SearchResult[]
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
@@ -14,13 +16,14 @@ type Props = {
   toggleButtonRef: React.RefObject<HTMLButtonElement | null>
   searchLimit: number
   koreanDataReady: boolean
+  lastSearchedQuery: string
 }
 
 export function SearchModal(props: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null)
   const {
-    open, onClose, query, setQuery, searching, searchResults,
-    onSubmit, onClickResult, toggleButtonRef, searchLimit, koreanDataReady
+    open, onClose, query, setQuery, searchScope, setSearchScope, searching, searchResults,
+    onSubmit, onClickResult, toggleButtonRef, searchLimit, koreanDataReady, lastSearchedQuery
   } = props
   return (
     <Modal open={open} titleId="search-dialog-title" onClose={onClose} initialFocusRef={inputRef} toggleButtonRef={toggleButtonRef}>
@@ -45,16 +48,46 @@ export function SearchModal(props: Props) {
               찾기
             </button>
           </div>
+          <fieldset className="search-scope" aria-label="검색 범위">
+            <legend className="sr-only">검색 범위</legend>
+            <label className="radio">
+              <input
+                type="radio"
+                name="scope"
+                value="all"
+                checked={searchScope === 'all'}
+                onChange={() => setSearchScope('all')}
+              /> 전체
+            </label>
+            <label className="radio">
+              <input
+                type="radio"
+                name="scope"
+                value="ot"
+                checked={searchScope === 'ot'}
+                onChange={() => setSearchScope('ot')}
+              /> 구약
+            </label>
+            <label className="radio">
+              <input
+                type="radio"
+                name="scope"
+                value="nt"
+                checked={searchScope === 'nt'}
+                onChange={() => setSearchScope('nt')}
+              /> 신약
+            </label>
+          </fieldset>
         </form>
         <div className="modal__content">
           <div className="search-results__header">
             <h3>검색 결과</h3>
             {searching && <span className="badge">검색 중…</span>}
-            {!searching && query.trim() && (
+            {!searching && lastSearchedQuery.trim() && (
               <span className="search-results__count">{searchResults.length}개</span>
             )}
           </div>
-          {query.trim() && !searchResults.length && !searching && (
+          {lastSearchedQuery.trim() && !searchResults.length && !searching && (
             <p className="empty-state">검색 결과가 없습니다.</p>
           )}
           <ul className="search-results__list">

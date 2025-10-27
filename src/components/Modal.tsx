@@ -11,37 +11,54 @@ type ModalProps = {
 
 export function Modal({ open, titleId, onClose, initialFocusRef, toggleButtonRef, children }: ModalProps) {
   const panelRef = useRef<HTMLDivElement | null>(null)
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null)
+  const onCloseRef = useRef(onClose)
+
+  // keep latest onClose without retriggering effects
+  useEffect(() => {
+    onCloseRef.current = onClose
+  }, [onClose])
 
   // focus initial input
   useEffect(() => {
     if (!open) return
     const raf = window.requestAnimationFrame(() => {
-      initialFocusRef?.current?.focus()
-      panelRef.current?.focus()
+      if (initialFocusRef?.current) {
+        initialFocusRef.current.focus()
+      } else {
+        panelRef.current?.focus()
+      }
     })
     return () => window.cancelAnimationFrame(raf)
   }, [open, initialFocusRef])
 
-  // ESC close, scroll lock, focus return
+  // ESC close, scroll lock (no focus return here)
   useEffect(() => {
     if (!open) return
     const prevOverflow = document.body.style.overflow
-    const previouslyFocused = document.activeElement as HTMLElement | null
-    const toggleEl = toggleButtonRef?.current ?? null
+    previouslyFocusedRef.current = document.activeElement as HTMLElement | null
     document.body.style.overflow = 'hidden'
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') onCloseRef.current()
     }
     window.addEventListener('keydown', onKeyDown)
     return () => {
       window.removeEventListener('keydown', onKeyDown)
       document.body.style.overflow = prevOverflow
-      setTimeout(() => {
-        if (toggleEl) toggleEl.focus()
-        else previouslyFocused?.focus()
-      }, 0)
     }
-  }, [open, onClose, toggleButtonRef])
+  }, [open])
+
+  // When modal closes, return focus to toggle button (or previously focused)
+  useEffect(() => {
+    if (open) return
+    const toggleEl = toggleButtonRef?.current ?? null
+    const prev = previouslyFocusedRef.current
+    const id = window.setTimeout(() => {
+      if (toggleEl) toggleEl.focus()
+      else prev?.focus()
+    }, 0)
+    return () => window.clearTimeout(id)
+  }, [open, toggleButtonRef])
 
   // focus trap
   useEffect(() => {

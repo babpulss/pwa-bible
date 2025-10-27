@@ -1,5 +1,5 @@
 import type { ChangeEvent, FormEvent } from 'react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
 import type { Selection, SearchResult } from './types/bible'
 import { useBibleTranslation } from './hooks/useBibleTranslation'
 import './App.css'
@@ -49,6 +49,10 @@ function App() {
   const setSearchResults = useAppStore((s) => s.setSearchResults)
   const searching = useAppStore((s) => s.searching)
   const setSearching = useAppStore((s) => s.setSearching)
+  const lastSearchedQuery = useAppStore((s) => s.lastSearchedQuery)
+  const setLastSearchedQuery = useAppStore((s) => s.setLastSearchedQuery)
+  const searchScope = useAppStore((s) => s.searchScope)
+  const setSearchScope = useAppStore((s) => s.setSearchScope)
   const focusTarget = useAppStore((s) => s.focusTarget)
   const setFocusTarget = useAppStore((s) => s.setFocusTarget)
   const showSearch = useAppStore((s) => s.showSearch)
@@ -148,9 +152,9 @@ function App() {
       const element = document.getElementById(id)
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'center' })
-        element.classList.add('highlight')
+        element.classList.add('verse-highlight')
         timeoutId = window.setTimeout(() => {
-          element.classList.remove('highlight')
+          element.classList.remove('verse-highlight')
         }, 1600)
       }
     })
@@ -430,6 +434,7 @@ function App() {
       setSearching(false)
   setSearchResults([])
   setQuery('')
+      setLastSearchedQuery('')
     } else {
       setShowSettings(false)
     }
@@ -438,7 +443,7 @@ function App() {
 
   // Theme toggling is handled in SettingsModal
 
-  const runSearch = (term: string) => {
+  const runSearch = useCallback((term: string) => {
     if (!koreanData) {
       return
     }
@@ -455,6 +460,9 @@ function App() {
     const timeoutId = window.setTimeout(() => {
       const results: SearchResult[] = []
       for (const book of koreanData.books) {
+        // scope filter: ot(<=39), nt(>=40)
+        if (searchScope === 'ot' && book.number > 39) continue
+        if (searchScope === 'nt' && book.number <= 39) continue
         for (const chapter of book.chapters) {
           for (const verse of chapter.verses) {
             if (verse.text.includes(term)) {
@@ -479,17 +487,20 @@ function App() {
         }
       }
       setSearchResults(results)
+      setLastSearchedQuery(term)
       setSearching(false)
       searchTimeoutRef.current = null
     }, 0)
     searchTimeoutRef.current = timeoutId
-  }
+  }, [koreanData, searchScope, setSearchResults, setSearching, setLastSearchedQuery])
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const term = query.trim()
     runSearch(term)
   }
+
+  // 자동 재검색 제거: 사용자가 제출할 때만 수행
 
   const handleResultClick = (result: SearchResult) => {
     if (!koreanData) {
@@ -625,9 +636,33 @@ function App() {
           {!loadError && !isPending && currentBook && currentChapter && (
             <>
               <header className="chapter-header">
-                <h2>
-                  {currentBook.title} {currentChapter.number}장
-                </h2>
+                <div className="chapter-header__top">
+                  <h2 className="chapter-header__title">
+                    {currentBook.title} {currentChapter.number}장
+                  </h2>
+                  <div className="chapter-header__nav" aria-label="장 이동">
+                    <button
+                      type="button"
+                      className="nav-btn nav-btn--prev nav-btn--small"
+                      onClick={goPrevChapter}
+                      disabled={!canGoPrev}
+                      title="이전 장"
+                    >
+                      <span className="nav-btn__icon" aria-hidden="true">‹</span>
+                      <span className="nav-btn__label">이전</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="nav-btn nav-btn--next nav-btn--small"
+                      onClick={goNextChapter}
+                      disabled={!canGoNext}
+                      title="다음 장"
+                    >
+                      <span className="nav-btn__label">다음</span>
+                      <span className="nav-btn__icon" aria-hidden="true">›</span>
+                    </button>
+                  </div>
+                </div>
                 <div className="chapter-header__translations">
                   <span>{koreanData?.translation}</span>
                   {showEnglishColumn && <span>{englishData?.translation ?? 'KJV'}</span>}
@@ -669,6 +704,14 @@ function App() {
                 </button>
                 <button
                   type="button"
+                  className="nav-btn nav-btn--top"
+                  onClick={scrollChapterToTop}
+                  title="맨 위로"
+                >
+                  <span className="nav-btn__label">맨 위로</span>
+                </button>
+                <button
+                  type="button"
                   className="nav-btn nav-btn--next"
                   onClick={goNextChapter}
                   disabled={!canGoNext}
@@ -688,6 +731,8 @@ function App() {
         onClose={toggleSearch}
         query={query}
         setQuery={setQuery}
+        searchScope={searchScope}
+        setSearchScope={setSearchScope}
         searching={searching}
         searchResults={searchResults}
         onSubmit={handleSearch}
@@ -695,6 +740,7 @@ function App() {
         toggleButtonRef={searchToggleRef}
         searchLimit={SEARCH_LIMIT}
         koreanDataReady={!!koreanData}
+        lastSearchedQuery={lastSearchedQuery}
       />
 
       <SettingsModal

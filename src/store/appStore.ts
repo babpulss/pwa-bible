@@ -22,8 +22,10 @@ type AppState = {
   showSearch: boolean
   showSettings: boolean
   query: string
+  searchScope: 'all' | 'ot' | 'nt'
   searchResults: SearchResult[]
   searching: boolean
+  lastSearchedQuery: string
 
   focusTarget: FocusTarget
 
@@ -48,8 +50,10 @@ type AppState = {
   toggleSettings: () => void
 
   setQuery: (q: string) => void
+  setSearchScope: (v: 'all' | 'ot' | 'nt') => void
   setSearchResults: (r: SearchResult[]) => void
   setSearching: (v: boolean) => void
+  setLastSearchedQuery: (q: string) => void
 
   setFocusTarget: (t: FocusTarget) => void
 
@@ -76,8 +80,10 @@ export const useAppStore = create<AppState>()(
       showSearch: false,
   showSettings: false,
       query: '',
+  searchScope: 'all',
       searchResults: [],
       searching: false,
+  lastSearchedQuery: '',
 
       focusTarget: null,
 
@@ -105,8 +111,10 @@ export const useAppStore = create<AppState>()(
   toggleSettings: () => set((s: AppState) => ({ showSettings: !s.showSettings })),
 
       setQuery: (q: string) => set({ query: q }),
+  setSearchScope: (v: 'all' | 'ot' | 'nt') => set({ searchScope: v }),
       setSearchResults: (r: SearchResult[]) => set({ searchResults: r }),
       setSearching: (v: boolean) => set({ searching: v }),
+  setLastSearchedQuery: (q: string) => set({ lastSearchedQuery: q }),
 
       setFocusTarget: (t: FocusTarget) => set({ focusTarget: t })
       ,
@@ -122,7 +130,8 @@ export const useAppStore = create<AppState>()(
         theme: state.theme,
         manualTheme: state.manualTheme,
         fontScale: state.fontScale,
-        showEnglish: state.showEnglish
+        showEnglish: state.showEnglish,
+        searchScope: state.searchScope
         ,wakeLockEnabled: state.wakeLockEnabled
       })
     }
