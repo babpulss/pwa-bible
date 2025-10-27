@@ -1,4 +1,5 @@
 # 오프라인 성경 PWA
+[https://pwa-bible.babpulss.workers.dev/](https://pwa-bible.babpulss.workers.dev/)
 
 광고나 부가 기능 없이 성경 본문을 빠르게 읽고 검색할 수 있도록 만든 Vite + React 기반 PWA입니다. 최초 접속 시 `public/data/korean_bible.json`(개역한글)을 내려받아 `service worker`에 캐시하며, 이후에는 오프라인에서도 동일하게 사용할 수 있습니다.
 
