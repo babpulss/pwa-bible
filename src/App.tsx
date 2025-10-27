@@ -1,8 +1,9 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import type { Selection, Theme, SearchResult } from './types/bible'
+import type { Selection, SearchResult } from './types/bible'
 import { useBibleTranslation } from './hooks/useBibleTranslation'
 import './App.css'
+import { useAppStore } from './store/appStore'
 
 const STORAGE_KEY = 'simple-bible:last-selection'
 const THEME_KEY = 'simple-bible:theme'
@@ -29,67 +30,35 @@ const loadSelection = (): Selection | null => {
   return null
 }
 
-const getInitialTheme = (): Theme => {
-  if (typeof window === 'undefined') {
-    return 'light'
-  }
-  const stored = window.localStorage.getItem(THEME_KEY)
-  if (stored === 'light' || stored === 'dark') {
-    return stored
-  }
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-}
-
-const getInitialFontScale = (): number => {
-  if (typeof window === 'undefined') {
-    return 1
-  }
-  const stored = window.localStorage.getItem(FONT_SCALE_KEY)
-  if (!stored) {
-    return 1
-  }
-  const parsed = Number.parseFloat(stored)
-  if (Number.isFinite(parsed)) {
-    return Math.min(MAX_FONT_SCALE, Math.max(MIN_FONT_SCALE, parsed))
-  }
-  return 1
-}
+// getInitialTheme/getInitialFontScale are now managed via store persistence and
+// explicit effects below to keep legacy localStorage keys in sync.
 
 function App() {
-  const [bookIndex, setBookIndex] = useState(0)
-  const [chapterIndex, setChapterIndex] = useState(0)
+  const bookIndex = useAppStore((s) => s.bookIndex)
+  const setBookIndex = useAppStore((s) => s.setBookIndex)
+  const chapterIndex = useAppStore((s) => s.chapterIndex)
+  const setChapterIndex = useAppStore((s) => s.setChapterIndex)
   const [savedSelection] = useState<Selection | null>(() =>
     typeof window !== 'undefined' ? loadSelection() : null
   )
-  const [query, setQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
-  const [searching, setSearching] = useState(false)
-  const [focusTarget, setFocusTarget] = useState<Selection & { verse: number } | null>(null)
-  const [showSearch, setShowSearch] = useState(false)
-  const [manualTheme, setManualTheme] = useState<boolean>(() => {
-    if (typeof window === 'undefined') {
-      return false
-    }
-    const stored = window.localStorage.getItem(THEME_KEY)
-    return stored === 'light' || stored === 'dark'
-  })
-  const [theme, setTheme] = useState<Theme>(() => {
-    const initial = getInitialTheme()
-    if (typeof window !== 'undefined') {
-      const root = window.document.documentElement
-      root.dataset.theme = initial
-      root.style.colorScheme = initial
-    }
-    return initial
-  })
-  const [fontScale, setFontScale] = useState<number>(() => getInitialFontScale())
-  const [showEnglish, setShowEnglish] = useState(() => {
-    if (typeof window === 'undefined') {
-      return true
-    }
-    const stored = window.localStorage.getItem(SHOW_ENGLISH_KEY)
-    return stored !== 'false'
-  })
+  const query = useAppStore((s) => s.query)
+  const setQuery = useAppStore((s) => s.setQuery)
+  const searchResults = useAppStore((s) => s.searchResults)
+  const setSearchResults = useAppStore((s) => s.setSearchResults)
+  const searching = useAppStore((s) => s.searching)
+  const setSearching = useAppStore((s) => s.setSearching)
+  const focusTarget = useAppStore((s) => s.focusTarget)
+  const setFocusTarget = useAppStore((s) => s.setFocusTarget)
+  const showSearch = useAppStore((s) => s.showSearch)
+  const setShowSearch = useAppStore((s) => s.setShowSearch)
+  const manualTheme = useAppStore((s) => s.manualTheme)
+  const setManualTheme = useAppStore((s) => s.setManualTheme)
+  const theme = useAppStore((s) => s.theme)
+  const setTheme = useAppStore((s) => s.setTheme)
+  const fontScale = useAppStore((s) => s.fontScale)
+  const setFontScale = useAppStore((s) => s.setFontScale)
+  const showEnglish = useAppStore((s) => s.showEnglish)
+  const setShowEnglish = useAppStore((s) => s.setShowEnglish)
   const searchInputRef = useRef<HTMLInputElement | null>(null)
   const searchTimeoutRef = useRef<number | null>(null)
 
@@ -128,7 +97,7 @@ function App() {
         setChapterIndex(chapterIdx)
       }
     }
-  }, [koreanData, savedSelection])
+  }, [koreanData, savedSelection, setBookIndex, setChapterIndex])
 
   useEffect(() => {
     if (!koreanData) {
@@ -188,7 +157,7 @@ function App() {
       setFocusTarget(null)
     }, 2000)
     return () => window.clearTimeout(cleanup)
-  }, [focusTarget])
+  }, [focusTarget, setFocusTarget])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -238,7 +207,7 @@ function App() {
     return () => {
       media.removeEventListener('change', listener)
     }
-  }, [manualTheme])
+  }, [manualTheme, setTheme])
 
   useEffect(() => {
     if (!showSearch) {
@@ -306,39 +275,85 @@ function App() {
   }, [currentChapter, englishChapter])
 
   const adjustFontScale = (delta: number) => {
-    setFontScale((prev) => {
-      const next = Math.min(
-        MAX_FONT_SCALE,
-        Math.max(MIN_FONT_SCALE, Number((prev + delta).toFixed(2)))
-      )
-      return next
-    })
+    const next = Math.min(
+      MAX_FONT_SCALE,
+      Math.max(MIN_FONT_SCALE, Number((fontScale + delta).toFixed(2)))
+    )
+    setFontScale(next)
   }
 
   const increaseFont = () => adjustFontScale(FONT_STEP)
   const decreaseFont = () => adjustFontScale(-FONT_STEP)
-  const toggleEnglish = () => setShowEnglish((prev) => !prev)
+  const toggleEnglish = () => setShowEnglish(!showEnglish)
+
+  // Chapter navigation helpers
+  const canGoPrev = useMemo(() => {
+    if (!koreanData || !currentBook) return false
+    return chapterIndex > 0 || bookIndex > 0
+  }, [koreanData, currentBook, chapterIndex, bookIndex])
+
+  const canGoNext = useMemo(() => {
+    if (!koreanData || !currentBook) return false
+    const lastChapterIndex = (currentBook?.chapters.length ?? 1) - 1
+    const lastBookIndex = (koreanData?.books.length ?? 1) - 1
+    return chapterIndex < lastChapterIndex || bookIndex < lastBookIndex
+  }, [koreanData, currentBook, chapterIndex, bookIndex])
+
+  const scrollChapterToTop = () => {
+    const el = document.querySelector('.chapter') as HTMLElement | null
+    if (el) {
+      el.scrollIntoView({ behavior: 'auto', block: 'start' })
+    } else {
+      window.scrollTo({ top: 0, behavior: 'auto' })
+    }
+  }
+
+  const goPrevChapter = () => {
+    if (!koreanData || !currentBook) return
+    if (chapterIndex > 0) {
+      setChapterIndex(Math.max(0, chapterIndex - 1))
+    } else if (bookIndex > 0) {
+      const prevBookIndex = bookIndex - 1
+      const prevBook = koreanData.books[prevBookIndex]
+      const lastChapterOfPrev = prevBook.chapters.length - 1
+      setBookIndex(prevBookIndex)
+      setChapterIndex(lastChapterOfPrev)
+    }
+    scrollChapterToTop()
+  }
+
+  const goNextChapter = () => {
+    if (!koreanData || !currentBook) return
+    const lastChapterIndex = currentBook.chapters.length - 1
+    const lastBookIndex = koreanData.books.length - 1
+    if (chapterIndex < lastChapterIndex) {
+      setChapterIndex(Math.min(lastChapterIndex, chapterIndex + 1))
+    } else if (bookIndex < lastBookIndex) {
+      const nextBookIndex = bookIndex + 1
+      setBookIndex(nextBookIndex)
+      setChapterIndex(0)
+    }
+    scrollChapterToTop()
+  }
 
   const toggleSearch = () => {
-    setShowSearch((prev) => {
-      const next = !prev
-      if (!next) {
-        if (searchTimeoutRef.current !== null) {
-          window.clearTimeout(searchTimeoutRef.current)
-          searchTimeoutRef.current = null
-        }
-        setSearching(false)
-        setSearchResults([])
-        setQuery('')
-        searchInputRef.current?.blur()
+    const next = !showSearch
+    if (!next) {
+      if (searchTimeoutRef.current !== null) {
+        window.clearTimeout(searchTimeoutRef.current)
+        searchTimeoutRef.current = null
       }
-      return next
-    })
+      setSearching(false)
+      setSearchResults([])
+      setQuery('')
+      searchInputRef.current?.blur()
+    }
+    setShowSearch(next)
   }
 
   const toggleTheme = () => {
     setManualTheme(true)
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'))
+    setTheme(theme === 'light' ? 'dark' : 'light')
   }
 
   const runSearch = (term: string) => {
@@ -599,6 +614,28 @@ function App() {
                   </li>
                 ))}
               </ol>
+              <nav className="chapter-nav" aria-label="장 이동">
+                <button
+                  type="button"
+                  className="nav-btn nav-btn--prev"
+                  onClick={goPrevChapter}
+                  disabled={!canGoPrev}
+                  title="이전 장"
+                >
+                  <span className="nav-btn__icon" aria-hidden="true">‹</span>
+                  <span className="nav-btn__label">이전 장</span>
+                </button>
+                <button
+                  type="button"
+                  className="nav-btn nav-btn--next"
+                  onClick={goNextChapter}
+                  disabled={!canGoNext}
+                  title="다음 장"
+                >
+                  <span className="nav-btn__label">다음 장</span>
+                  <span className="nav-btn__icon" aria-hidden="true">›</span>
+                </button>
+              </nav>
             </>
           )}
         </section>

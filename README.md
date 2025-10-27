@@ -1,7 +1,7 @@
 # 오프라인 성경 PWA
 [https://pwa-bible.babpulss.workers.dev/](https://pwa-bible.babpulss.workers.dev/)
 
-광고나 부가 기능 없이 성경 본문을 빠르게 읽고 검색할 수 있도록 만든 Vite + React 기반 PWA입니다. 최초 접속 시 `public/data/korean_bible.json`(개역한글)을 내려받아 `service worker`에 캐시하며, 이후에는 오프라인에서도 동일하게 사용할 수 있습니다.
+광고나 부가 기능 없이 성경 본문을 빠르게 읽고 검색할 수 있도록 만든 Vite + React 기반 PWA입니다. 최초 접속 시 `public/data/korean_bible.json`(개역한글) & kjv_bible.json(KJV)을 내려받아 `service worker`에 캐시하며, 이후에는 오프라인에서도 동일하게 사용할 수 있습니다.
 
 ## 주요 기능
 - 성경/장 선택: 마지막으로 읽은 위치를 자동 저장해 재방문 시 이어서 열기
@@ -10,8 +10,8 @@
 - 라이트/다크 테마: 상단 토글로 즉시 전환, 시스템 기본 테마 자동 인식
 - 검색 UI 최소화: 돋보기 버튼을 눌렀을 때만 검색창/결과 패널이 펼쳐져 본문에 집중 가능
 - 글꼴 크기 조절: 헤더의 `Aa±` 버튼으로 본문 글꼴 비율을 즉시 변경 및 저장
-- 한/영 병렬 본문: 개역한글과 NIV를 한 화면에서 절 단위로 비교, NIV 토글로 숨김/표시 제어
-- 오프라인 지원: PWA 설치 및 `korean_bible.json`, `niv_bible.json`을 포함한 자산을 프리캐시
+- 한/영 병렬 본문: 개역한글과 KJV를 한 화면에서 절 단위로 비교, KJV 토글로 숨김/표시 제어
+- 오프라인 지원: PWA 설치 및 `korean_bible.json`, `kjv_bible.json`을 포함한 자산을 프리캐시
 - 가독성 향상 폰트: Noto Sans/Serif KR (WOFF2) 파일을 `public/fonts`에 포함해 완전 오프라인에서도 동일한 렌더링
 - Tailwind 기반 스타일: CSS 변수로 테마를 유지하면서 Tailwind 유틸리티/컴포넌트 레이어로 레이아웃 구성
 
@@ -39,7 +39,7 @@ npm run preview
 frontend/
   public/
     data/korean_bible.json   # 개역한글 본문
-    data/niv_bible.json      # NIV 본문
+    data/kjv_bible.json      # KJV 본문
     icons/                   # PWA 아이콘 세트
   src/
     App.tsx                  # 메인 리더 UI 및 검색
