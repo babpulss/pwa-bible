@@ -4,6 +4,8 @@ import type { Selection, SearchResult } from './types/bible'
 import { useBibleTranslation } from './hooks/useBibleTranslation'
 import './App.css'
 import { useAppStore } from './store/appStore'
+import { SearchModal } from './components/SearchModal'
+import { SettingsModal } from './components/SettingsModal'
 
 const STORAGE_KEY = 'simple-bible:last-selection'
 const THEME_KEY = 'simple-bible:theme'
@@ -51,6 +53,9 @@ function App() {
   const setFocusTarget = useAppStore((s) => s.setFocusTarget)
   const showSearch = useAppStore((s) => s.showSearch)
   const setShowSearch = useAppStore((s) => s.setShowSearch)
+  const showSettings = useAppStore((s) => s.showSettings)
+  const setShowSettings = useAppStore((s) => s.setShowSettings)
+  const toggleSettings = useAppStore((s) => s.toggleSettings)
   const manualTheme = useAppStore((s) => s.manualTheme)
   const setManualTheme = useAppStore((s) => s.setManualTheme)
   const theme = useAppStore((s) => s.theme)
@@ -59,8 +64,12 @@ function App() {
   const setFontScale = useAppStore((s) => s.setFontScale)
   const showEnglish = useAppStore((s) => s.showEnglish)
   const setShowEnglish = useAppStore((s) => s.setShowEnglish)
-  const searchInputRef = useRef<HTMLInputElement | null>(null)
+  const wakeLockEnabled = useAppStore((s) => s.wakeLockEnabled)
+  const setWakeLockEnabled = useAppStore((s) => s.setWakeLockEnabled)
+  const searchToggleRef = useRef<HTMLButtonElement | null>(null)
+  const settingsToggleRef = useRef<HTMLButtonElement | null>(null)
   const searchTimeoutRef = useRef<number | null>(null)
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null)
 
   const {
     data: koreanData,
@@ -83,6 +92,8 @@ function App() {
     ? 'KJV 데이터를 불러오지 못했습니다.'
     : null
 
+  const wakeLockSupported = typeof navigator !== 'undefined' && !!navigator.wakeLock
+
   useEffect(() => {
     if (!koreanData || !savedSelection) {
       return
@@ -104,6 +115,8 @@ function App() {
       return
     }
     const book = koreanData.books[bookIndex]
+  
+    // Settings Modal: ESC close, scroll lock, and focus return
     if (!book) {
       return
     }
@@ -175,6 +188,68 @@ function App() {
     window.document.documentElement.style.setProperty('--reader-font-scale', fontScale.toString())
   }, [fontScale])
 
+  // Wake Lock effect: request/release based on toggle and page visibility
+  useEffect(() => {
+    let cancelled = false
+    const supported = typeof navigator !== 'undefined' && !!navigator.wakeLock
+    if (!supported) return
+
+    const acquire = async () => {
+      if (!wakeLockEnabled || document.visibilityState !== 'visible') return
+      try {
+        const sentinel = await navigator.wakeLock!.request('screen')
+        if (cancelled) {
+          // If unmounted meanwhile, release immediately
+          try { await sentinel.release() } catch { /* ignore release errors */ }
+          return
+        }
+        wakeLockRef.current = sentinel
+        sentinel.onrelease = () => {
+          wakeLockRef.current = null
+          // If still enabled and visible, try re-acquire
+          if (wakeLockEnabled && document.visibilityState === 'visible') {
+            // Fire and forget (no await to avoid blocking handler)
+            acquire()
+          }
+        }
+      } catch {
+        // Permission denied or unsupported state; just ignore
+        // Optionally, we could surface a toast.
+      }
+    }
+
+    const release = async () => {
+      const s = wakeLockRef.current
+      if (s) {
+        wakeLockRef.current = null
+        try { await s.release() } catch { /* ignore release errors */ }
+      }
+    }
+
+    if (wakeLockEnabled) {
+      void acquire()
+    } else {
+      void release()
+    }
+
+    const onVisibility = () => {
+      if (!wakeLockEnabled) return
+      if (document.visibilityState === 'visible' && !wakeLockRef.current) {
+        void acquire()
+      } else if (document.visibilityState !== 'visible') {
+        // When hidden, it's generally released automatically; keep ref clean
+        wakeLockRef.current = null
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+
+    return () => {
+      cancelled = true
+      document.removeEventListener('visibilitychange', onVisibility)
+      void release()
+    }
+  }, [wakeLockEnabled])
+
   useEffect(() => {
     if (typeof window === 'undefined') {
       return
@@ -209,15 +284,24 @@ function App() {
     }
   }, [manualTheme, setTheme])
 
+  // Search modal behaviors are encapsulated in SearchModal
+
+  // 모달 열릴 때 배경 영역을 스크린리더에서 숨김 (검색/설정 모두 고려)
   useEffect(() => {
-    if (!showSearch) {
-      return
+    const main = document.querySelector('main.app-main')
+    const header = document.querySelector('header.app-header')
+    const footer = document.querySelector('footer.app-footer')
+    if (showSearch || showSettings) {
+      main?.setAttribute('aria-hidden', 'true')
+      header?.setAttribute('aria-hidden', 'true')
+      footer?.setAttribute('aria-hidden', 'true')
     }
-    const frame = window.requestAnimationFrame(() => {
-      searchInputRef.current?.focus()
-    })
-    return () => window.cancelAnimationFrame(frame)
-  }, [showSearch])
+    return () => {
+      main?.removeAttribute('aria-hidden')
+      header?.removeAttribute('aria-hidden')
+      footer?.removeAttribute('aria-hidden')
+    }
+  }, [showSearch, showSettings])
 
   useEffect(() => {
     return () => {
@@ -344,17 +428,15 @@ function App() {
         searchTimeoutRef.current = null
       }
       setSearching(false)
-      setSearchResults([])
-      setQuery('')
-      searchInputRef.current?.blur()
+  setSearchResults([])
+  setQuery('')
+    } else {
+      setShowSettings(false)
     }
     setShowSearch(next)
   }
 
-  const toggleTheme = () => {
-    setManualTheme(true)
-    setTheme(theme === 'light' ? 'dark' : 'light')
-  }
+  // Theme toggling is handled in SettingsModal
 
   const runSearch = (term: string) => {
     if (!koreanData) {
@@ -426,6 +508,7 @@ function App() {
     setBookIndex(bookIdx)
     setChapterIndex(chapterIdx)
     setFocusTarget({ book: result.bookNumber, chapter: result.chapter, verse: result.verse })
+    setShowSearch(false)
   }
 
   const handleBookChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -445,7 +528,6 @@ function App() {
     !!koreanData &&
     (!showEnglish || (!englishLoadError && !!englishData))
 
-  const themeIsDark = theme === 'dark'
 
   return (
     <div className={`app-shell${showSearch ? ' app-shell--search-open' : ''}`}>
@@ -462,6 +544,7 @@ function App() {
           <button
             type="button"
             className={`header-button search-toggle${showSearch ? ' header-button--active' : ''}`}
+            ref={searchToggleRef}
             onClick={toggleSearch}
             aria-pressed={showSearch}
             aria-expanded={showSearch}
@@ -473,44 +556,6 @@ function App() {
             </span>
             <span>{showSearch ? '검색 닫기' : '검색'}</span>
           </button>
-          <button
-            type="button"
-            className={`header-button theme-toggle${themeIsDark ? ' header-button--active' : ''}`}
-            onClick={toggleTheme}
-            aria-pressed={themeIsDark}
-            title={themeIsDark ? '라이트 모드로 전환' : '다크 모드로 전환'}
-          >
-            <span className="header-button__icon" aria-hidden="true">
-              {themeIsDark ? '☀️' : '🌙'}
-            </span>
-            <span>{themeIsDark ? '라이트 모드' : '다크 모드'}</span>
-          </button>
-          <div className="font-controls" role="group" aria-label="글꼴 크기 조절">
-            <button
-              type="button"
-              onClick={decreaseFont}
-              disabled={fontScale <= MIN_FONT_SCALE + 0.01}
-              className="font-controls__button"
-            >
-              Aa-
-            </button>
-            <span className="font-controls__value">{Math.round(fontScale * 100)}%</span>
-            <button
-              type="button"
-              onClick={increaseFont}
-              disabled={fontScale >= MAX_FONT_SCALE - 0.01}
-              className="font-controls__button"
-            >
-              Aa+
-            </button>
-          </div>
-          <label className="toggle" aria-label="KJV 번역 표시">
-            <span className="toggle__switch">
-              <input type="checkbox" checked={showEnglish} onChange={toggleEnglish} />
-              <span className="toggle__indicator" />
-            </span>
-            <span className="toggle__label">KJV 보기</span>
-          </label>
           <div className="status">
             {isPending && <span className="badge">불러오는 중…</span>}
             {!isPending && loadError && <span className="badge error">한글 데이터 오류</span>}
@@ -519,10 +564,25 @@ function App() {
             )}
             {offlineReady && <span className="badge ok">오프라인 준비 완료</span>}
           </div>
+          <button
+            type="button"
+            className={`header-button settings-toggle${showSettings ? ' header-button--active' : ''}`}
+            ref={settingsToggleRef}
+            onClick={() => {
+              if (!showSettings) setShowSearch(false)
+              toggleSettings()
+            }}
+            aria-pressed={showSettings}
+            aria-expanded={showSettings}
+            title={showSettings ? '설정 닫기' : '설정 열기'}
+          >
+            <span className="header-button__icon" aria-hidden="true">⚙️</span>
+            <span>{showSettings ? '설정 닫기' : '설정'}</span>
+          </button>
         </div>
       </header>
 
-      <main className={`app-main${showSearch ? ' app-main--with-search' : ''}`}>
+      <main className="app-main">
         <section className="controls">
           <div className="select-group">
             <label htmlFor="book-select">성경</label>
@@ -554,25 +614,7 @@ function App() {
               ))}
             </select>
           </div>
-          {showSearch && (
-            <form className="search" onSubmit={handleSearch}>
-              <label htmlFor="search-input">검색</label>
-              <div className="search-input">
-                <input
-                  ref={searchInputRef}
-                  id="search-input"
-                  type="search"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="단어 또는 구절을 입력하세요"
-                  disabled={!koreanData}
-                />
-                <button type="submit" disabled={!koreanData || searching} className="search-button">
-                  찾기
-                </button>
-              </div>
-            </form>
-          )}
+          {/* 검색 폼은 모달에서 렌더링 */}
         </section>
 
         <section className="chapter">
@@ -639,41 +681,44 @@ function App() {
             </>
           )}
         </section>
-
-        {showSearch && (
-          <aside className="search-results" id="search-results">
-            <div className="search-results__header">
-              <h3>검색 결과</h3>
-              {searching && <span className="badge">검색 중…</span>}
-              {!searching && query.trim() && (
-                <span className="search-results__count">{searchResults.length}개</span>
-              )}
-            </div>
-            {query.trim() && !searchResults.length && !searching && (
-              <p className="empty-state">검색 결과가 없습니다.</p>
-            )}
-            <ul>
-              {searchResults.map((result) => (
-                <li key={`${result.bookNumber}-${result.chapter}-${result.verse}`}>
-                  <button
-                    type="button"
-                    onClick={() => handleResultClick(result)}
-                    className="result-button"
-                  >
-                    <span className="result-meta">
-                      {result.bookTitle} {result.chapter}:{result.verse}
-                    </span>
-                    <span className="result-text">{result.text}</span>
-                  </button>
-                </li>
-              ))}
-              {searchResults.length >= SEARCH_LIMIT && (
-                <li className="hint">검색 결과가 많아 {SEARCH_LIMIT}개만 표시합니다.</li>
-              )}
-            </ul>
-          </aside>
-        )}
       </main>
+
+      <SearchModal
+        open={showSearch}
+        onClose={toggleSearch}
+        query={query}
+        setQuery={setQuery}
+        searching={searching}
+        searchResults={searchResults}
+        onSubmit={handleSearch}
+        onClickResult={handleResultClick}
+        toggleButtonRef={searchToggleRef}
+        searchLimit={SEARCH_LIMIT}
+        koreanDataReady={!!koreanData}
+      />
+
+      <SettingsModal
+        open={showSettings}
+        onClose={() => setShowSettings(false)}
+        toggleButtonRef={settingsToggleRef}
+        theme={theme}
+        setTheme={setTheme}
+        setManualTheme={setManualTheme}
+        fontScale={fontScale}
+        increaseFont={increaseFont}
+        decreaseFont={decreaseFont}
+        minFont={MIN_FONT_SCALE}
+        maxFont={MAX_FONT_SCALE}
+        wakeLockEnabled={wakeLockEnabled}
+        setWakeLockEnabled={setWakeLockEnabled}
+        wakeLockSupported={wakeLockSupported}
+        showEnglish={showEnglish}
+        toggleEnglish={toggleEnglish}
+        offlineReady={offlineReady}
+        isPending={isPending}
+        loadError={loadError}
+        englishLoadError={englishLoadError}
+      />
 
       <footer className="app-footer">
         <p>

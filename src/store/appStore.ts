@@ -17,7 +17,10 @@ type AppState = {
   fontScale: number
   showEnglish: boolean
 
+  wakeLockEnabled: boolean
+
   showSearch: boolean
+  showSettings: boolean
   query: string
   searchResults: SearchResult[]
   searching: boolean
@@ -41,12 +44,16 @@ type AppState = {
 
   setShowSearch: (v: boolean) => void
   toggleSearch: () => void
+  setShowSettings: (v: boolean) => void
+  toggleSettings: () => void
 
   setQuery: (q: string) => void
   setSearchResults: (r: SearchResult[]) => void
   setSearching: (v: boolean) => void
 
   setFocusTarget: (t: FocusTarget) => void
+
+  setWakeLockEnabled: (v: boolean) => void
 }
 
 const getInitialTheme = (): Theme => {
@@ -64,8 +71,10 @@ export const useAppStore = create<AppState>()(
       manualTheme: false,
   fontScale: 1.1,
       showEnglish: true,
+  wakeLockEnabled: false,
 
       showSearch: false,
+  showSettings: false,
       query: '',
       searchResults: [],
       searching: false,
@@ -92,12 +101,16 @@ export const useAppStore = create<AppState>()(
 
       setShowSearch: (v: boolean) => set({ showSearch: v }),
   toggleSearch: () => set((s: AppState) => ({ showSearch: !s.showSearch })),
+  setShowSettings: (v: boolean) => set({ showSettings: v }),
+  toggleSettings: () => set((s: AppState) => ({ showSettings: !s.showSettings })),
 
       setQuery: (q: string) => set({ query: q }),
       setSearchResults: (r: SearchResult[]) => set({ searchResults: r }),
       setSearching: (v: boolean) => set({ searching: v }),
 
       setFocusTarget: (t: FocusTarget) => set({ focusTarget: t })
+      ,
+      setWakeLockEnabled: (v: boolean) => set({ wakeLockEnabled: v })
     }),
     {
       name: 'simple-bible:app',
@@ -110,6 +123,7 @@ export const useAppStore = create<AppState>()(
         manualTheme: state.manualTheme,
         fontScale: state.fontScale,
         showEnglish: state.showEnglish
+        ,wakeLockEnabled: state.wakeLockEnabled
       })
     }
   )
