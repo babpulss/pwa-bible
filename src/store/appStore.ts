@@ -23,6 +23,8 @@ type AppState = {
   showSettings: boolean;
   query: string;
   searchScope: "all" | "ot" | "nt";
+  // 선택 시 이 책(번호 1..66)에서만 검색. null이면 범위(전체/구약/신약) 규칙 사용
+  searchBookNumber: number | null;
   searchResults: SearchResult[];
   searching: boolean;
   lastSearchedQuery: string;
@@ -51,6 +53,7 @@ type AppState = {
 
   setQuery: (q: string) => void;
   setSearchScope: (v: "all" | "ot" | "nt") => void;
+  setSearchBookNumber: (n: number | null) => void;
   setSearchResults: (r: SearchResult[]) => void;
   setSearching: (v: boolean) => void;
   setLastSearchedQuery: (q: string) => void;
@@ -83,6 +86,7 @@ export const useAppStore = create<AppState>()(
       showSettings: false,
       query: "",
       searchScope: "all",
+  searchBookNumber: null,
       searchResults: [],
       searching: false,
       lastSearchedQuery: "",
@@ -134,6 +138,7 @@ export const useAppStore = create<AppState>()(
 
       setQuery: (q: string) => set({ query: q }),
       setSearchScope: (v: "all" | "ot" | "nt") => set({ searchScope: v }),
+  setSearchBookNumber: (n: number | null) => set({ searchBookNumber: n }),
       setSearchResults: (r: SearchResult[]) => set({ searchResults: r }),
       setSearching: (v: boolean) => set({ searching: v }),
       setLastSearchedQuery: (q: string) => set({ lastSearchedQuery: q }),
@@ -153,6 +158,7 @@ export const useAppStore = create<AppState>()(
         fontScale: state.fontScale,
         showEnglish: state.showEnglish,
         searchScope: state.searchScope,
+        searchBookNumber: state.searchBookNumber,
         wakeLockEnabled: state.wakeLockEnabled,
       }),
     }

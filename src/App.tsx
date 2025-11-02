@@ -53,6 +53,8 @@ function App() {
   const setLastSearchedQuery = useAppStore((s) => s.setLastSearchedQuery)
   const searchScope = useAppStore((s) => s.searchScope)
   const setSearchScope = useAppStore((s) => s.setSearchScope)
+  const searchBookNumber = useAppStore((s) => s.searchBookNumber)
+  const setSearchBookNumber = useAppStore((s) => s.setSearchBookNumber)
   const focusTarget = useAppStore((s) => s.focusTarget)
   const setFocusTarget = useAppStore((s) => s.setFocusTarget)
   const showSearch = useAppStore((s) => s.showSearch)
@@ -460,6 +462,8 @@ function App() {
     const timeoutId = window.setTimeout(() => {
       const results: SearchResult[] = []
       for (const book of koreanData.books) {
+        // Book filter has highest priority
+        if (searchBookNumber && book.number !== searchBookNumber) continue
         // scope filter: ot(<=39), nt(>=40)
         if (searchScope === 'ot' && book.number > 39) continue
         if (searchScope === 'nt' && book.number <= 39) continue
@@ -492,7 +496,7 @@ function App() {
       searchTimeoutRef.current = null
     }, 0)
     searchTimeoutRef.current = timeoutId
-  }, [koreanData, searchScope, setSearchResults, setSearching, setLastSearchedQuery])
+  }, [koreanData, searchScope, searchBookNumber, setSearchResults, setSearching, setLastSearchedQuery])
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -500,14 +504,14 @@ function App() {
     runSearch(term)
   }
 
-  // 범위(전체/구약/신약) 변경 시에는 마지막 검색어 기준으로 즉시 재검색
+  // 범위/책 변경 시에는 마지막 검색어 기준으로 즉시 재검색
   useEffect(() => {
     if (!showSearch) return
     if (!koreanData) return
     const term = lastSearchedQuery.trim()
     if (!term) return
     runSearch(term)
-  }, [searchScope, lastSearchedQuery, showSearch, koreanData, runSearch])
+  }, [searchScope, searchBookNumber, lastSearchedQuery, showSearch, koreanData, runSearch])
 
   const handleResultClick = (result: SearchResult) => {
     if (!koreanData) {
@@ -740,6 +744,9 @@ function App() {
         setQuery={setQuery}
         searchScope={searchScope}
         setSearchScope={setSearchScope}
+        searchBookNumber={searchBookNumber}
+        setSearchBookNumber={setSearchBookNumber}
+        books={koreanData?.books ?? []}
         searching={searching}
         searchResults={searchResults}
         onSubmit={handleSearch}

@@ -1,6 +1,7 @@
 import { Modal } from './Modal'
 import type { SearchResult } from '../types/bible'
 import { useRef } from 'react'
+import type { Book } from '../types/bible'
 
 type Props = {
   open: boolean
@@ -9,6 +10,11 @@ type Props = {
   setQuery: (v: string) => void
   searchScope: 'all' | 'ot' | 'nt'
   setSearchScope: (v: 'all' | 'ot' | 'nt') => void
+  // 특정 책 선택: 번호(1..66) 또는 null
+  searchBookNumber: number | null
+  setSearchBookNumber: (n: number | null) => void
+  // 책 목록(셀렉트 렌더링용)
+  books: Book[]
   searching: boolean
   searchResults: SearchResult[]
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
@@ -22,7 +28,11 @@ type Props = {
 export function SearchModal(props: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null)
   const {
-    open, onClose, query, setQuery, searchScope, setSearchScope, searching, searchResults,
+    open, onClose, query, setQuery,
+    searchScope, setSearchScope,
+    searchBookNumber, setSearchBookNumber,
+    books,
+    searching, searchResults,
     onSubmit, onClickResult, toggleButtonRef, searchLimit, koreanDataReady, lastSearchedQuery
   } = props
   return (
@@ -77,6 +87,21 @@ export function SearchModal(props: Props) {
                 onChange={() => setSearchScope('nt')}
               /> 신약
             </label>
+            <select
+              aria-label="특정 책"
+              className="book-filter"
+              value={searchBookNumber ?? ''}
+              onChange={(e) => {
+                const v = e.target.value
+                setSearchBookNumber(v ? Number(v) : null)
+              }}
+              disabled={!koreanDataReady}
+            >
+              <option value="">전체 책</option>
+              {books.map((b) => (
+                <option key={b.number} value={b.number}>{b.title}</option>
+              ))}
+            </select>
           </fieldset>
         </form>
         <div className="modal__content">

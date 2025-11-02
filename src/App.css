@@ -283,6 +283,16 @@
   gap: 0.4rem;
 }
 
+/* 검색 범위 옆 책 콤보박스: 컴팩트하게 정렬 */
+.search-scope .book-filter {
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-input-bg);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+}
+
 .chapter {
   background: var(--color-surface);
   border-radius: 16px;
