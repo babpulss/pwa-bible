@@ -10,7 +10,10 @@ import { SettingsModal } from './components/SettingsModal'
 const STORAGE_KEY = 'simple-bible:last-selection'
 const THEME_KEY = 'simple-bible:theme'
 const FONT_SCALE_KEY = 'simple-bible:font-scale'
+const SHOW_KOREAN_KEY = 'simple-bible:show-korean'
 const SHOW_ENGLISH_KEY = 'simple-bible:show-english'
+const SHOW_JAPANESE_KEY = 'simple-bible:show-japanese'
+const SHOW_FURIGANA_KEY = 'simple-bible:show-furigana'
 const SEARCH_LIMIT = 120
 const MIN_FONT_SCALE = 0.85
 const MAX_FONT_SCALE = 1.4
@@ -68,8 +71,14 @@ function App() {
   const setTheme = useAppStore((s) => s.setTheme)
   const fontScale = useAppStore((s) => s.fontScale)
   const setFontScale = useAppStore((s) => s.setFontScale)
+  const showKorean = useAppStore((s) => s.showKorean)
+  const setShowKorean = useAppStore((s) => s.setShowKorean)
   const showEnglish = useAppStore((s) => s.showEnglish)
   const setShowEnglish = useAppStore((s) => s.setShowEnglish)
+  const showJapanese = useAppStore((s) => s.showJapanese)
+  const setShowJapanese = useAppStore((s) => s.setShowJapanese)
+  const showFurigana = useAppStore((s) => s.showFurigana)
+  const setShowFurigana = useAppStore((s) => s.setShowFurigana)
   const wakeLockEnabled = useAppStore((s) => s.wakeLockEnabled)
   const setWakeLockEnabled = useAppStore((s) => s.setWakeLockEnabled)
   const searchToggleRef = useRef<HTMLButtonElement | null>(null)
@@ -87,8 +96,16 @@ function App() {
     isPending: englishPending,
     error: englishError
   } = useBibleTranslation('kjv')
+  const {
+    data: japaneseData,
+    isPending: japanesePending,
+    error: japaneseError
+  } = useBibleTranslation('ja')
 
-  const isPending = koreanPending || (showEnglish && englishPending)
+  const isPending =
+    koreanPending ||
+    (showEnglish && englishPending) ||
+    (showJapanese && japanesePending)
   const loadError = koreanError
     ? '성경 데이터를 불러오지 못했습니다. 오프라인 상태인지 확인해주세요.'
     : null
@@ -96,6 +113,11 @@ function App() {
     ? null
     : englishError
     ? 'KJV 데이터를 불러오지 못했습니다.'
+    : null
+  const japaneseLoadError = !showJapanese || koreanError
+    ? null
+    : japaneseError
+    ? '일본어 성경 데이터를 불러오지 못했습니다.'
     : null
 
   const wakeLockSupported = typeof navigator !== 'undefined' && !!navigator.wakeLock
@@ -268,8 +290,29 @@ function App() {
     if (typeof window === 'undefined') {
       return
     }
+    window.localStorage.setItem(SHOW_KOREAN_KEY, String(showKorean))
+  }, [showKorean])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
     window.localStorage.setItem(SHOW_ENGLISH_KEY, String(showEnglish))
   }, [showEnglish])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+    window.localStorage.setItem(SHOW_JAPANESE_KEY, String(showJapanese))
+  }, [showJapanese])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+    window.localStorage.setItem(SHOW_FURIGANA_KEY, String(showFurigana))
+  }, [showFurigana])
 
   useEffect(() => {
     if (manualTheme && typeof window !== 'undefined') {
@@ -346,7 +389,23 @@ function App() {
     return englishBook.chapters[chapterIndex] ?? null
   }, [englishBook, chapterIndex, showEnglish])
 
-  const showEnglishColumn = Boolean(englishChapter)
+  const japaneseBook = useMemo(() => {
+    if (!showJapanese || !japaneseData) {
+      return null
+    }
+    return japaneseData.books[bookIndex] ?? null
+  }, [japaneseData, bookIndex, showJapanese])
+
+  const japaneseChapter = useMemo(() => {
+    if (!showJapanese || !japaneseBook) {
+      return null
+    }
+    return japaneseBook.chapters[chapterIndex] ?? null
+  }, [japaneseBook, chapterIndex, showJapanese])
+
+  const showKoreanColumn = Boolean(showKorean && currentChapter)
+  const showEnglishColumn = Boolean(showEnglish && englishChapter)
+  const showJapaneseColumn = Boolean(showJapanese && japaneseChapter)
 
   const combinedVerses = useMemo(() => {
     if (!currentChapter) {
@@ -358,12 +417,31 @@ function App() {
         englishMap.set(verse.number, verse.text)
       })
     }
+    const japaneseMap = new Map<number, string>()
+    if (japaneseChapter) {
+      japaneseChapter.verses.forEach((verse) => {
+        japaneseMap.set(verse.number, verse.text)
+      })
+    }
     return currentChapter.verses.map((verse) => ({
       number: verse.number,
       korean: verse.text,
-      english: englishMap.get(verse.number) ?? ''
+      english: englishMap.get(verse.number) ?? '',
+      japanese: japaneseMap.get(verse.number) ?? ''
     }))
-  }, [currentChapter, englishChapter])
+  }, [currentChapter, englishChapter, japaneseChapter])
+
+  const activeColumns = Number(showKoreanColumn) + Number(showEnglishColumn) + Number(showJapaneseColumn)
+
+  const verseListClass = useMemo(() => {
+    if (activeColumns >= 3) {
+      return 'verses verses--triple'
+    }
+    if (activeColumns === 2) {
+      return 'verses verses--dual'
+    }
+    return 'verses'
+  }, [activeColumns])
 
   const adjustFontScale = (delta: number) => {
     const next = Math.min(
@@ -375,7 +453,10 @@ function App() {
 
   const increaseFont = () => adjustFontScale(FONT_STEP)
   const decreaseFont = () => adjustFontScale(-FONT_STEP)
+  const toggleKorean = () => setShowKorean(!showKorean)
   const toggleEnglish = () => setShowEnglish(!showEnglish)
+  const toggleJapanese = () => setShowJapanese(!showJapanese)
+  const toggleFurigana = () => setShowFurigana(!showFurigana)
 
   // Chapter navigation helpers
   const canGoPrev = useMemo(() => {
@@ -549,7 +630,8 @@ function App() {
     !isPending &&
     !loadError &&
     !!koreanData &&
-    (!showEnglish || (!englishLoadError && !!englishData))
+    (!showEnglish || (!englishLoadError && !!englishData)) &&
+    (!showJapanese || (!japaneseLoadError && !!japaneseData))
 
 
   return (
@@ -584,6 +666,9 @@ function App() {
             {!isPending && loadError && <span className="badge error">한글 데이터 오류</span>}
             {!isPending && !loadError && englishLoadError && showEnglish && (
               <span className="badge warn">KJV 오류</span>
+            )}
+            {!isPending && !loadError && japaneseLoadError && showJapanese && (
+              <span className="badge warn">일본어 성경 오류</span>
             )}
             {offlineReady && <span className="badge ok">오프라인 준비 완료</span>}
           </div>
@@ -676,33 +761,59 @@ function App() {
                   </div>
                 </div>
                 <div className="chapter-header__translations">
-                  <span>{koreanData?.translation}</span>
+                  {showKoreanColumn && <span>{koreanData?.translation}</span>}
                   {showEnglishColumn && <span>{englishData?.translation ?? 'KJV'}</span>}
+                  {showJapaneseColumn && (
+                    <span>{japaneseData?.translation ?? '日本語聖書'}</span>
+                  )}
                 </div>
               </header>
               {englishLoadError && showEnglish && (
                 <p className="empty-state secondary">{englishLoadError}</p>
               )}
-              <ol className={`verses${showEnglishColumn ? ' verses--dual' : ''}`}>
-                {combinedVerses.map((verse) => (
-                  <li
-                    key={verse.number}
-                    id={`verse-${currentBook.number}-${currentChapter.number}-${verse.number}`}
-                    className="verse-row"
-                  >
-                    <div className="verse-column">
-                      <span className="verse-number">{verse.number}</span>
-                      <span className="verse-text">{verse.korean}</span>
-                    </div>
-                    {showEnglishColumn && (
-                      <div className="verse-column verse-column--secondary">
-                        <span className="verse-number">{verse.number}</span>
-                        <span className="verse-text">{verse.english || '—'}</span>
-                      </div>
-                    )}
-                  </li>
-                ))}
-              </ol>
+              {japaneseLoadError && showJapanese && (
+                <p className="empty-state secondary">{japaneseLoadError}</p>
+              )}
+              {activeColumns === 0 ? (
+                <p className="empty-state secondary">표시할 번역을 설정에서 선택하세요.</p>
+              ) : (
+                <ol className={verseListClass}>
+                  {combinedVerses.map((verse) => (
+                    <li
+                      key={verse.number}
+                      id={`verse-${currentBook.number}-${currentChapter.number}-${verse.number}`}
+                      className="verse-row"
+                    >
+                      {showKoreanColumn && (
+                        <div className="verse-column">
+                          <span className="verse-number">{verse.number}</span>
+                          <span className="verse-text">{verse.korean}</span>
+                        </div>
+                      )}
+                      {showEnglishColumn && (
+                        <div className="verse-column verse-column--secondary">
+                          <span className="verse-number">{verse.number}</span>
+                          <span className="verse-text">{verse.english || '—'}</span>
+                        </div>
+                      )}
+                      {showJapaneseColumn && (
+                        <div className="verse-column verse-column--secondary verse-column--ruby">
+                          <span className="verse-number">{verse.number}</span>
+                          {verse.japanese ? (
+                            <span
+                              className="verse-text verse-text--ruby"
+                              data-show-furigana={showFurigana ? 'true' : 'false'}
+                              dangerouslySetInnerHTML={{ __html: verse.japanese }}
+                            />
+                          ) : (
+                            <span className="verse-text">—</span>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ol>
+              )}
               <nav className="chapter-nav" aria-label="장 이동">
                 <button
                   type="button"
@@ -774,12 +885,19 @@ function App() {
         wakeLockEnabled={wakeLockEnabled}
         setWakeLockEnabled={setWakeLockEnabled}
         wakeLockSupported={wakeLockSupported}
+        showKorean={showKorean}
+        toggleKorean={toggleKorean}
         showEnglish={showEnglish}
         toggleEnglish={toggleEnglish}
+        showJapanese={showJapanese}
+        toggleJapanese={toggleJapanese}
+        showFurigana={showFurigana}
+        toggleFurigana={toggleFurigana}
         offlineReady={offlineReady}
         isPending={isPending}
         loadError={loadError}
         englishLoadError={englishLoadError}
+        japaneseLoadError={japaneseLoadError}
       />
 
       <footer className="app-footer">

@@ -17,12 +17,19 @@ type Props = {
   wakeLockEnabled: boolean
   setWakeLockEnabled: (v: boolean) => void
   wakeLockSupported: boolean
+  showKorean: boolean
+  toggleKorean: () => void
   showEnglish: boolean
   toggleEnglish: () => void
+  showJapanese: boolean
+  toggleJapanese: () => void
+  showFurigana: boolean
+  toggleFurigana: () => void
   offlineReady: boolean
   isPending: boolean
   loadError: string | null
   englishLoadError: string | null
+  japaneseLoadError: string | null
 }
 
 export function SettingsModal(props: Props) {
@@ -30,8 +37,11 @@ export function SettingsModal(props: Props) {
     open, onClose, toggleButtonRef, theme, manualTheme, setTheme, setManualTheme,
     fontScale, increaseFont, decreaseFont, minFont, maxFont,
     wakeLockEnabled, setWakeLockEnabled, wakeLockSupported,
+    showKorean, toggleKorean,
     showEnglish, toggleEnglish,
-    offlineReady, isPending, loadError, englishLoadError
+    showJapanese, toggleJapanese,
+    showFurigana, toggleFurigana,
+    offlineReady, isPending, loadError, englishLoadError, japaneseLoadError
   } = props
 
   return (
@@ -124,6 +134,19 @@ export function SettingsModal(props: Props) {
           )}
 
           <div className="settings__row">
+            <div className="settings__label">개역한글 보기</div>
+            <div className="settings__control">
+              <label className="toggle" aria-label="개역한글 번역 표시">
+                <span className="toggle__switch">
+                  <input type="checkbox" checked={showKorean} onChange={toggleKorean} />
+                  <span className="toggle__indicator" />
+                </span>
+                <span className="toggle__label">표시</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="settings__row">
             <div className="settings__label">KJV 보기</div>
             <div className="settings__control">
               <label className="toggle" aria-label="KJV 번역 표시">
@@ -133,6 +156,33 @@ export function SettingsModal(props: Props) {
                 </span>
                 <span className="toggle__label">표시</span>
               </label>
+            </div>
+          </div>
+
+          <div className="settings__row">
+            <div className="settings__label">일본어 보기</div>
+            <div className="settings__control">
+              <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <label className="toggle" aria-label="일본어 성경 번역 표시">
+                  <span className="toggle__switch">
+                    <input type="checkbox" checked={showJapanese} onChange={toggleJapanese} />
+                    <span className="toggle__indicator" />
+                  </span>
+                  <span className="toggle__label">표시</span>
+                </label>
+                <label className="toggle" aria-label="후리가나 표시">
+                  <span className="toggle__switch">
+                    <input
+                      type="checkbox"
+                      checked={showFurigana}
+                      onChange={toggleFurigana}
+                      disabled={!showJapanese}
+                    />
+                    <span className="toggle__indicator" />
+                  </span>
+                  <span className="toggle__label">후리가나</span>
+                </label>
+              </div>
             </div>
           </div>
 
@@ -147,6 +197,8 @@ export function SettingsModal(props: Props) {
                 <span className="badge error">한글 데이터 오류</span>
               ) : englishLoadError ? (
                 <span className="badge warn">KJV 오류</span>
+              ) : japaneseLoadError ? (
+                <span className="badge warn">일본어 성경 오류</span>
               ) : (
                 <span className="badge">온라인</span>
               )}
@@ -160,7 +212,8 @@ export function SettingsModal(props: Props) {
               <p style={{ margin: 0 }}>
                 저작권 안내: 개역한글(대한성서공회) 본문은 대한성서공회가 제공한 공개 사용 안내 범위
                 내에서 자유롭게 이용할 수 있습니다(자세한 조건은 저작권 안내 참고). King James
-                Version(KJV)은 퍼블릭 도메인으로 자유롭게 사용 및 배포할 수 있습니다.
+                Version(KJV)은 퍼블릭 도메인으로 자유롭게 사용 및 배포할 수 있습니다. 口語訳聖書
+                (1955年版ルビ付き) 역시 퍼블릭 도메인 자료입니다.
               </p>
               <p style={{ margin: '0.35rem 0 0' }}>
                 데이터는 최초 접속 시 한 번 내려받아 이후 오프라인에서도 사용할 수 있습니다.

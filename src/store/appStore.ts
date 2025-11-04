@@ -15,7 +15,10 @@ type AppState = {
   theme: Theme;
   manualTheme: boolean;
   fontScale: number;
+  showKorean: boolean;
   showEnglish: boolean;
+  showJapanese: boolean;
+  showFurigana: boolean;
 
   wakeLockEnabled: boolean;
 
@@ -43,8 +46,14 @@ type AppState = {
   increaseFont: () => void;
   decreaseFont: () => void;
 
+  setShowKorean: (v: boolean) => void;
+  toggleKorean: () => void;
   setShowEnglish: (v: boolean) => void;
   toggleEnglish: () => void;
+  setShowJapanese: (v: boolean) => void;
+  toggleJapanese: () => void;
+  setShowFurigana: (v: boolean) => void;
+  toggleFurigana: () => void;
 
   setShowSearch: (v: boolean) => void;
   toggleSearch: () => void;
@@ -79,7 +88,10 @@ export const useAppStore = create<AppState>()(
       theme: getInitialTheme(),
       manualTheme: false,
       fontScale: 1.1,
+      showKorean: true,
       showEnglish: true,
+      showJapanese: false,
+      showFurigana: true,
       wakeLockEnabled: false,
 
       showSearch: false,
@@ -126,9 +138,18 @@ export const useAppStore = create<AppState>()(
           ),
         })),
 
+      setShowKorean: (v: boolean) => set({ showKorean: v }),
+      toggleKorean: () =>
+        set((s: AppState) => ({ showKorean: !s.showKorean })),
       setShowEnglish: (v: boolean) => set({ showEnglish: v }),
       toggleEnglish: () =>
         set((s: AppState) => ({ showEnglish: !s.showEnglish })),
+      setShowJapanese: (v: boolean) => set({ showJapanese: v }),
+      toggleJapanese: () =>
+        set((s: AppState) => ({ showJapanese: !s.showJapanese })),
+      setShowFurigana: (v: boolean) => set({ showFurigana: v }),
+      toggleFurigana: () =>
+        set((s: AppState) => ({ showFurigana: !s.showFurigana })),
 
       setShowSearch: (v: boolean) => set({ showSearch: v }),
       toggleSearch: () => set((s: AppState) => ({ showSearch: !s.showSearch })),
@@ -156,7 +177,10 @@ export const useAppStore = create<AppState>()(
         theme: state.theme,
         manualTheme: state.manualTheme,
         fontScale: state.fontScale,
+        showKorean: state.showKorean,
         showEnglish: state.showEnglish,
+        showJapanese: state.showJapanese,
+        showFurigana: state.showFurigana,
         searchScope: state.searchScope,
         searchBookNumber: state.searchBookNumber,
         wakeLockEnabled: state.wakeLockEnabled,

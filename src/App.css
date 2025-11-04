@@ -334,7 +334,7 @@
 
 .chapter-header__translations {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
   gap: 0.75rem;
   font-size: 0.85rem;
   color: var(--color-text-secondary);
@@ -364,23 +364,35 @@
   transition: background 160ms ease, color 160ms ease;
 }
 
-.verses:not(.verses--dual) li:hover {
-  background: var(--color-verse-hover);
-  border-radius: 12px;
+.verses:not(.verses--dual):not(.verses--triple) .verse-row {
   padding: 0.4rem 0.6rem;
-  margin: -0.4rem -0.6rem;
+  border-radius: 12px;
+  transition: background 160ms ease, color 160ms ease;
 }
 
-.verses--dual .verse-row {
+.verses:not(.verses--dual):not(.verses--triple) .verse-row:hover {
+  background: var(--color-verse-hover);
+}
+
+.verses--dual .verse-row,
+.verses--triple .verse-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.9rem; /* tighten column gap */
   padding: 0.45rem 0.55rem; /* slightly tighter */
   border-radius: 12px;
   transition: background 160ms ease, box-shadow 160ms ease;
 }
 
-.verses--dual .verse-row:hover {
+.verses--dual .verse-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.verses--triple .verse-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.verses--dual .verse-row:hover,
+.verses--triple .verse-row:hover {
   background: var(--color-verse-hover);
   box-shadow: inset 0 0 0 1px rgba(44, 91, 232, 0.06);
 }
@@ -393,6 +405,38 @@
 
 .verse-column--secondary {
   color: var(--color-text-secondary);
+}
+
+.verse-column--ruby {
+  color: var(--color-text-secondary);
+}
+
+.verse-text--ruby {
+  display: block;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-break: strict;
+}
+
+.verse-text--ruby ruby {
+  ruby-position: over;
+  ruby-align: center;
+}
+
+.verse-text--ruby rt {
+  font-size: 0.65em;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.verse-text--ruby[data-show-furigana="false"] ruby {
+  ruby-position: unset;
+}
+
+.verse-text--ruby[data-show-furigana="false"] rt,
+.verse-text--ruby[data-show-furigana="false"] rp {
+  display: none;
 }
 
 .verse-text {
@@ -811,14 +855,16 @@
     justify-content: space-between;
   }
 
-  /* 모바일에서는 두 번역을 위아래로 스택 */
-  .verses--dual .verse-row {
+  /* 모바일에서는 여러 번역을 위아래로 스택 */
+  .verses--dual .verse-row,
+  .verses--triple .verse-row {
     grid-template-columns: 1fr;
     gap: 0.6rem; /* tighter vertical spacing between translations */
   }
 
   /* 스택 시 가독성을 위한 구분선 */
-  .verses--dual .verse-row .verse-column--secondary {
+  .verses--dual .verse-row .verse-column--secondary,
+  .verses--triple .verse-row .verse-column--secondary {
     border-top: 1px solid var(--color-divider);
     padding-top: 0.4rem;
     margin-top: 0.2rem;

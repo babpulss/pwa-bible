@@ -3,7 +3,8 @@ import type { BibleData } from '../types/bible'
 
 const TRANSLATION_SOURCES = {
   kor: '/data/korean_bible.json',
-  kjv: '/data/kjv_bible.json'
+  kjv: '/data/kjv_bible.json',
+  ja: '/data/japanese_bible.json'
 } as const
 
 export type TranslationKey = keyof typeof TRANSLATION_SOURCES
