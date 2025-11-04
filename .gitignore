@@ -4,3 +4,4 @@ dev-dist
 scripts
 public/data/niv_bible.json
 .DS_Store
+.vscode

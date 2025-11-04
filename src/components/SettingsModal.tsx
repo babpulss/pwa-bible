@@ -1,11 +1,13 @@
 import { Modal } from './Modal'
+import type { Theme } from '../types/bible'
 
 type Props = {
   open: boolean
   onClose: () => void
   toggleButtonRef: React.RefObject<HTMLButtonElement | null>
-  theme: 'light' | 'dark'
-  setTheme: (t: 'light' | 'dark') => void
+  theme: Theme
+  manualTheme: boolean
+  setTheme: (t: Theme) => void
   setManualTheme: (v: boolean) => void
   fontScale: number
   increaseFont: () => void
@@ -25,7 +27,7 @@ type Props = {
 
 export function SettingsModal(props: Props) {
   const {
-    open, onClose, toggleButtonRef, theme, setTheme, setManualTheme,
+    open, onClose, toggleButtonRef, theme, manualTheme, setTheme, setManualTheme,
     fontScale, increaseFont, decreaseFont, minFont, maxFont,
     wakeLockEnabled, setWakeLockEnabled, wakeLockSupported,
     showEnglish, toggleEnglish,
@@ -43,17 +45,51 @@ export function SettingsModal(props: Props) {
           <div className="settings__row">
             <div className="settings__label">테마</div>
             <div className="settings__control">
-              <label className="toggle" aria-label="다크 모드">
-                <span className="toggle__switch">
-                  <input
-                    type="checkbox"
-                    checked={theme === 'dark'}
-                    onChange={(e) => { setManualTheme(true); setTheme(e.target.checked ? 'dark' : 'light') }}
-                  />
-                  <span className="toggle__indicator" />
-                </span>
-                <span className="toggle__label">다크 모드</span>
-              </label>
+              <fieldset style={{ border: 'none', margin: 0, padding: 0 }}>
+                <legend className="sr-only">테마 선택</legend>
+                <div role="radiogroup" aria-label="테마 선택" style={{ display: 'grid', gap: '0.5rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <input
+                      type="radio"
+                      name="theme-option"
+                      checked={!manualTheme}
+                      onChange={() => {
+                        const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+                        setManualTheme(false)
+                        setTheme(prefersDark ? 'dark' as Theme : 'light' as Theme)
+                      }}
+                    />
+                    <span>시스템 기본</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <input
+                      type="radio"
+                      name="theme-option"
+                      checked={manualTheme && theme === 'light'}
+                      onChange={() => { setManualTheme(true); setTheme('light') }}
+                    />
+                    <span>라이트</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <input
+                      type="radio"
+                      name="theme-option"
+                      checked={manualTheme && theme === 'dark'}
+                      onChange={() => { setManualTheme(true); setTheme('dark') }}
+                    />
+                    <span>다크</span>
+                  </label>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <input
+                      type="radio"
+                      name="theme-option"
+                      checked={manualTheme && theme === 'amoled'}
+                      onChange={() => { setManualTheme(true); setTheme('amoled') }}
+                    />
+                    <span>고대비</span>
+                  </label>
+                </div>
+              </fieldset>
             </div>
           </div>
 

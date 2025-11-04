@@ -25,7 +25,7 @@ export type Selection = {
   chapter: number
 }
 
-export type Theme = 'light' | 'dark'
+export type Theme = 'light' | 'dark' | 'amoled'
 
 export type SearchResult = {
   bookNumber: number

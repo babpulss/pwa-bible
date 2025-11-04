@@ -184,7 +184,8 @@ function App() {
     }
     const root = window.document.documentElement
     root.dataset.theme = theme
-    root.style.colorScheme = theme
+    // Map custom themes to a valid color-scheme keyword for UA default styling
+    root.style.colorScheme = theme === 'light' ? 'light' : 'dark'
   }, [theme])
 
   useEffect(() => {
@@ -762,6 +763,7 @@ function App() {
         onClose={() => setShowSettings(false)}
         toggleButtonRef={settingsToggleRef}
         theme={theme}
+        manualTheme={manualTheme}
         setTheme={setTheme}
         setManualTheme={setManualTheme}
         fontScale={fontScale}
