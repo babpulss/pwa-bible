@@ -1,8 +1,9 @@
-import type { ChangeEvent, FormEvent } from "react";
+import type { FormEvent } from "react";
 import { useCallback, useMemo, useRef, useState } from "react";
 import "./App.css";
 import { SearchModal } from "./components/SearchModal";
 import { SettingsModal } from "./components/SettingsModal";
+import { JumpModal } from "./components/JumpModal";
 import {
   BASE_FONT_SCALE,
   FONT_STEP,
@@ -75,6 +76,7 @@ function App() {
   const setShowSearch = useAppStore((s) => s.setShowSearch);
   const showSettings = useAppStore((s) => s.showSettings);
   const setShowSettings = useAppStore((s) => s.setShowSettings);
+  const [showJump, setShowJump] = useState(false);
   const toggleSettings = useAppStore((s) => s.toggleSettings);
   const manualTheme = useAppStore((s) => s.manualTheme);
   const setManualTheme = useAppStore((s) => s.setManualTheme);
@@ -100,6 +102,7 @@ function App() {
   const setWakeLockEnabled = useAppStore((s) => s.setWakeLockEnabled);
   const searchToggleRef = useRef<HTMLButtonElement | null>(null);
   const settingsToggleRef = useRef<HTMLButtonElement | null>(null);
+  const jumpToggleRef = useRef<HTMLButtonElement | null>(null);
   const searchTimeoutRef = useRef<number | null>(null);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
@@ -267,7 +270,7 @@ function App() {
 
   useWakeLockEffect(wakeLockEnabled, wakeLockRef);
 
-  useModalAccessibility(showSearch, showSettings);
+  useModalAccessibility(showSearch, showSettings, showJump);
 
   useSearchTimeoutCleanup(searchTimeoutRef);
 
@@ -335,6 +338,82 @@ function App() {
     focusTarget,
     currentBook,
   });
+
+  const currentReferenceLabel = useMemo(() => {
+    if (!currentBook || !currentChapter) {
+      return !koreanData ? "위치 불러오는 중..." : "위치를 확인할 수 없습니다";
+    }
+    const verseLabel = selectedVerse ? `${selectedVerse}절` : "";
+    return `${currentBook.title} ${currentChapter.number}장${verseLabel ? ` ${verseLabel}` : ""}`;
+  }, [currentBook, currentChapter, selectedVerse, koreanData]);
+
+  const canJumpToCurrentStart = Boolean(
+    currentChapter && currentChapter.verses.length > 0
+  );
+
+  const handleJump = useCallback(
+    (bookNumber: number, chapterNumber: number, verseNumber: number) => {
+      if (!koreanData) {
+        return;
+      }
+      const bookIdx = koreanData.books.findIndex(
+        (book) => book.number === bookNumber
+      );
+      if (bookIdx === -1) {
+        return;
+      }
+      const chapterIdx = koreanData.books[bookIdx].chapters.findIndex(
+        (chapter) => chapter.number === chapterNumber
+      );
+      if (chapterIdx === -1) {
+        return;
+      }
+      setBookIndex(bookIdx);
+      setChapterIndex(chapterIdx);
+      const targetChapter = koreanData.books[bookIdx].chapters[chapterIdx];
+      const verseExists = targetChapter.verses.some(
+        (verse) => verse.number === verseNumber
+      );
+      const verseToUse = verseExists
+        ? verseNumber
+        : targetChapter.verses[0]?.number ?? null;
+      setSelectedVerse(verseToUse);
+      if (verseToUse !== null) {
+        setFocusTarget({
+          book: bookNumber,
+          chapter: chapterNumber,
+          verse: verseToUse,
+        });
+      } else {
+        setFocusTarget(null);
+      }
+    },
+    [koreanData, setBookIndex, setChapterIndex, setSelectedVerse, setFocusTarget]
+  );
+
+  const handleJumpToCurrentChapterStart = useCallback(() => {
+    if (!koreanData) {
+      return;
+    }
+    const book = koreanData.books[bookIndex];
+    if (!book) {
+      return;
+    }
+    const chapter = book.chapters[chapterIndex];
+    if (!chapter) {
+      return;
+    }
+    const firstVerse = chapter.verses[0]?.number;
+    if (!firstVerse) {
+      return;
+    }
+    setSelectedVerse(firstVerse);
+    setFocusTarget({
+      book: book.number,
+      chapter: chapter.number,
+      verse: firstVerse,
+    });
+  }, [koreanData, bookIndex, chapterIndex, setSelectedVerse, setFocusTarget]);
 
   const showKoreanColumn = Boolean(showKorean && currentChapter);
   const showEnglishColumn = Boolean(showEnglish && englishChapter);
@@ -494,8 +573,10 @@ function App() {
       setSearchResults([]);
       setQuery("");
       setLastSearchedQuery("");
+      setShowJump(false);
     } else {
       setShowSettings(false);
+      setShowJump(false);
     }
     setShowSearch(next);
   };
@@ -619,36 +700,6 @@ function App() {
     setShowSearch(false);
   };
 
-  const handleBookChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const index = Number(event.target.value);
-    setBookIndex(index);
-    setChapterIndex(0);
-    const nextBook = koreanData?.books[index];
-    const firstVerse = nextBook?.chapters[0]?.verses[0]?.number ?? null;
-    setSelectedVerse(firstVerse);
-  };
-
-  const handleChapterChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const index = Number(event.target.value);
-    setChapterIndex(index);
-    const nextChapter = currentBook?.chapters[index];
-    const firstVerse = nextChapter?.verses[0]?.number ?? null;
-    setSelectedVerse(firstVerse);
-  };
-
-  const handleVerseChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    const verseNumber = Number(event.target.value);
-    if (!currentBook || !currentChapter || Number.isNaN(verseNumber)) {
-      return;
-    }
-    setSelectedVerse(verseNumber);
-    setFocusTarget({
-      book: currentBook.number,
-      chapter: currentChapter.number,
-      verse: verseNumber,
-    });
-  };
-
   const offlineReady =
     !isPending &&
     !loadError &&
@@ -666,6 +717,22 @@ function App() {
         <div className="header-actions">
           <button
             type="button"
+            className="jump-button"
+            onClick={() => {
+              setShowSearch(false);
+              setShowSettings(false);
+              setShowJump(true);
+            }}
+            disabled={!koreanData}
+            ref={jumpToggleRef}
+            aria-haspopup="dialog"
+            aria-expanded={showJump}
+          >
+            바로가기
+          </button>
+
+          <button
+            type="button"
             className={`header-button search-toggle${
               showSearch ? " header-button--active" : ""
             }`}
@@ -681,6 +748,7 @@ function App() {
             </span>
             <span>검색</span>
           </button>
+
           <div className="status">
             {isPending && <span className="badge">불러오는 중…</span>}
             {!isPending && loadError && (
@@ -709,7 +777,10 @@ function App() {
             }`}
             ref={settingsToggleRef}
             onClick={() => {
-              if (!showSettings) setShowSearch(false);
+              if (!showSettings) {
+                setShowSearch(false);
+                setShowJump(false);
+              }
               toggleSettings();
             }}
             aria-pressed={showSettings}
@@ -725,54 +796,6 @@ function App() {
       </header>
 
       <main className="app-main">
-        <section className="controls">
-          <div className="select-group">
-            <label htmlFor="book-select">성경</label>
-            <select
-              id="book-select"
-              value={bookIndex}
-              onChange={handleBookChange}
-              disabled={!koreanData}
-            >
-              {koreanData?.books.map((book, index) => (
-                <option key={book.number} value={index}>
-                  {book.title}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="select-group">
-            <label htmlFor="chapter-select">장</label>
-            <select
-              id="chapter-select"
-              value={chapterIndex}
-              onChange={handleChapterChange}
-              disabled={!currentBook}
-            >
-              {currentBook?.chapters.map((chapter, index) => (
-                <option key={chapter.number} value={index}>
-                  {chapter.number}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div className="select-group">
-            <label htmlFor="verse-select">절</label>
-            <select
-              id="verse-select"
-              value={selectedVerse ?? ""}
-              onChange={handleVerseChange}
-              disabled={!currentChapter || currentChapter.verses.length === 0}
-            >
-              {currentChapter?.verses.map((verse) => (
-                <option key={verse.number} value={verse.number}>
-                  {verse.number}
-                </option>
-              ))}
-            </select>
-          </div>
-          {/* 검색 폼은 모달에서 렌더링 */}
-        </section>
 
         <section className="chapter">
           {loadError && <p className="empty-state">{loadError}</p>}
@@ -944,6 +967,16 @@ function App() {
         toggleButtonRef={searchToggleRef}
         searchReady={searchReady}
         lastSearchedQuery={lastSearchedQuery}
+      />
+
+      <JumpModal
+        open={showJump}
+        onClose={() => setShowJump(false)}
+        toggleButtonRef={jumpToggleRef}
+        books={koreanData?.books ?? []}
+        onJump={handleJump}
+        canJumpToCurrentStart={canJumpToCurrentStart}
+        onJumpToCurrentStart={handleJumpToCurrentChapterStart}
       />
 
       <SettingsModal

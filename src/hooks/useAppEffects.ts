@@ -422,13 +422,14 @@ export const useTranslationPreferences = ({
 
 export const useModalAccessibility = (
   showSearch: boolean,
-  showSettings: boolean
+  showSettings: boolean,
+  showJump: boolean
 ) => {
   useEffect(() => {
     const main = document.querySelector("main.app-main");
     const header = document.querySelector("header.app-header");
     const footer = document.querySelector("footer.app-footer");
-    if (showSearch || showSettings) {
+    if (showSearch || showSettings || showJump) {
       main?.setAttribute("aria-hidden", "true");
       header?.setAttribute("aria-hidden", "true");
       footer?.setAttribute("aria-hidden", "true");
@@ -438,7 +439,7 @@ export const useModalAccessibility = (
       header?.removeAttribute("aria-hidden");
       footer?.removeAttribute("aria-hidden");
     };
-  }, [showSearch, showSettings]);
+  }, [showSearch, showSettings, showJump]);
 };
 
 export const useSearchTimeoutCleanup = (
