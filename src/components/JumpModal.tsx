@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Modal } from "./Modal";
 import type { Book, Chapter, Verse } from "../types/bible";
 
@@ -10,25 +10,20 @@ type Props = {
   toggleButtonRef: React.RefObject<HTMLButtonElement | null>;
   books: Book[];
   onJump: (bookNumber: number, chapterNumber: number, verseNumber: number) => void;
-  canJumpToCurrentStart: boolean;
-  onJumpToCurrentStart: () => void;
 };
 
 export function JumpModal(props: Props) {
-  const {
-    open,
-    onClose,
-    toggleButtonRef,
-    books,
-    onJump,
-    canJumpToCurrentStart,
-    onJumpToCurrentStart,
-  } = props;
+  const { open, onClose, toggleButtonRef, books, onJump } = props;
 
   const [step, setStep] = useState<Step>("book");
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [selectedChapter, setSelectedChapter] = useState<Chapter | null>(null);
   const firstInteractiveRef = useRef<HTMLButtonElement | null>(null);
+  const booksByTestament = useMemo(() => {
+    const ot = books.filter((book) => book.number <= 39);
+    const nt = books.filter((book) => book.number > 39);
+    return { ot, nt };
+  }, [books]);
 
   useEffect(() => {
     if (!open) return;
@@ -45,10 +40,10 @@ export function JumpModal(props: Props) {
     return () => window.cancelAnimationFrame(raf);
   }, [open, step]);
 
-  const handleSelectBook = (book: Book) => {
+  const handleSelectBook = useCallback((book: Book) => {
     setSelectedBook(book);
     setStep("chapter");
-  };
+  }, []);
 
   const handleSelectChapter = (chapter: Chapter) => {
     setSelectedChapter(chapter);
@@ -87,19 +82,40 @@ export function JumpModal(props: Props) {
   }, [step, selectedBook, selectedChapter]);
 
   const bookGrid = useMemo(() => {
-    return books.map((book, index) => (
-      <button
-        key={book.number}
-        type="button"
-        className="jump-card"
-        onClick={() => handleSelectBook(book)}
-        ref={index === 0 ? firstInteractiveRef : undefined}
-      >
-        <span className="jump-card__title">{book.title}</span>
-        <span className="jump-card__meta">{book.chapters.length}장</span>
-      </button>
-    ));
-  }, [books]);
+    const renderSection = (
+      title: string,
+      groupBooks: Book[],
+      offset: number
+    ) => {
+      if (groupBooks.length === 0) return null;
+      return (
+        <div className="jump-book-section" key={title}>
+          <p className="jump-book-section__title">{title}</p>
+          <div className="jump-book-row">
+            {groupBooks.map((book, index) => (
+              <button
+                key={book.number}
+                type="button"
+                className="jump-card jump-card--book"
+                onClick={() => handleSelectBook(book)}
+                ref={index + offset === 0 ? firstInteractiveRef : undefined}
+              >
+                <span className="jump-card__title">{book.title}</span>
+                <span className="jump-card__meta">{book.chapters.length}장</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      );
+    };
+
+    return (
+      <div className="jump-book-groups">
+        {renderSection("구약", booksByTestament.ot, 0)}
+        {renderSection("신약", booksByTestament.nt, booksByTestament.ot.length)}
+      </div>
+    );
+  }, [booksByTestament, handleSelectBook]);
 
   const chapterGrid = useMemo(() => {
     if (!selectedBook) return null;
@@ -133,24 +149,12 @@ export function JumpModal(props: Props) {
 
   const renderContent = () => {
     if (step === "book") {
-      return (
-        <div className="jump-grid jump-grid--books">
-          {bookGrid}
-        </div>
-      );
+      return <div className="jump-book-wrapper">{bookGrid}</div>;
     }
     if (step === "chapter") {
-      return (
-        <div className="jump-grid jump-grid--chapters">
-          {chapterGrid}
-        </div>
-      );
+      return <div className="jump-grid jump-grid--chapters">{chapterGrid}</div>;
     }
-    return (
-      <div className="jump-grid jump-grid--verses">
-        {verseGrid}
-      </div>
-    );
+    return <div className="jump-grid jump-grid--verses">{verseGrid}</div>;
   };
 
   return (
@@ -175,39 +179,22 @@ export function JumpModal(props: Props) {
       </div>
       <div className="modal__body jump-modal">
         <div className="jump-actions">
-          <div className="jump-actions__left">
-            {step !== "book" && (
-              <button type="button" className="jump-secondary" onClick={handleBack}>
-                ← 뒤로가기
-              </button>
-            )}
-          </div>
-          <div className="jump-actions__right">
-            <button
-              type="button"
-              className="jump-secondary"
-              onClick={() => {
-                onJumpToCurrentStart();
-                onClose();
-              }}
-              disabled={!canJumpToCurrentStart}
-            >
-              현재 장 1절로 이동
+          {step !== "book" && (
+            <button type="button" className="jump-secondary" onClick={handleBack}>
+              ← 뒤로가기
             </button>
-          </div>
+          )}
         </div>
         <div className="jump-step-header">
-          <p className="jump-step-title">{stepTitle}</p>
-          {step === "verse" && selectedChapter && (
-            <p className="jump-step-hint">
-              총 {selectedChapter.verses.length}절
-            </p>
-          )}
-          {step === "chapter" && selectedBook && (
-            <p className="jump-step-hint">
-              총 {selectedBook.chapters.length}장
-            </p>
-          )}
+          <p className="jump-step-title">
+            {stepTitle}
+            {step === "chapter" && selectedBook && (
+              <span className="jump-step-hint">총 {selectedBook.chapters.length}장</span>
+            )}
+            {step === "verse" && selectedChapter && (
+              <span className="jump-step-hint">총 {selectedChapter.verses.length}절</span>
+            )}
+          </p>
         </div>
         {renderContent()}
       </div>

@@ -339,18 +339,6 @@ function App() {
     currentBook,
   });
 
-  const currentReferenceLabel = useMemo(() => {
-    if (!currentBook || !currentChapter) {
-      return !koreanData ? "위치 불러오는 중..." : "위치를 확인할 수 없습니다";
-    }
-    const verseLabel = selectedVerse ? `${selectedVerse}절` : "";
-    return `${currentBook.title} ${currentChapter.number}장${verseLabel ? ` ${verseLabel}` : ""}`;
-  }, [currentBook, currentChapter, selectedVerse, koreanData]);
-
-  const canJumpToCurrentStart = Boolean(
-    currentChapter && currentChapter.verses.length > 0
-  );
-
   const handleJump = useCallback(
     (bookNumber: number, chapterNumber: number, verseNumber: number) => {
       if (!koreanData) {
@@ -390,30 +378,6 @@ function App() {
     },
     [koreanData, setBookIndex, setChapterIndex, setSelectedVerse, setFocusTarget]
   );
-
-  const handleJumpToCurrentChapterStart = useCallback(() => {
-    if (!koreanData) {
-      return;
-    }
-    const book = koreanData.books[bookIndex];
-    if (!book) {
-      return;
-    }
-    const chapter = book.chapters[chapterIndex];
-    if (!chapter) {
-      return;
-    }
-    const firstVerse = chapter.verses[0]?.number;
-    if (!firstVerse) {
-      return;
-    }
-    setSelectedVerse(firstVerse);
-    setFocusTarget({
-      book: book.number,
-      chapter: chapter.number,
-      verse: firstVerse,
-    });
-  }, [koreanData, bookIndex, chapterIndex, setSelectedVerse, setFocusTarget]);
 
   const showKoreanColumn = Boolean(showKorean && currentChapter);
   const showEnglishColumn = Boolean(showEnglish && englishChapter);
@@ -975,8 +939,6 @@ function App() {
         toggleButtonRef={jumpToggleRef}
         books={koreanData?.books ?? []}
         onJump={handleJump}
-        canJumpToCurrentStart={canJumpToCurrentStart}
-        onJumpToCurrentStart={handleJumpToCurrentChapterStart}
       />
 
       <SettingsModal
