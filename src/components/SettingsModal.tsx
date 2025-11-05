@@ -14,6 +14,8 @@ type Props = {
   decreaseFont: () => void;
   minFont: number;
   maxFont: number;
+  baseFont: number;
+  fontStep: number;
   wakeLockEnabled: boolean;
   setWakeLockEnabled: (v: boolean) => void;
   wakeLockSupported: boolean;
@@ -58,6 +60,8 @@ export function SettingsModal(props: Props) {
     decreaseFont,
     minFont,
     maxFont,
+    baseFont,
+    fontStep,
     wakeLockEnabled,
     setWakeLockEnabled,
     wakeLockSupported,
@@ -88,6 +92,8 @@ export function SettingsModal(props: Props) {
     japaneseLoadError,
   } = props;
 
+  const displayPercent = Math.round((fontScale / baseFont) * 20 + 1e-6) * 5;
+
   return (
     <Modal
       open={open}
@@ -103,7 +109,7 @@ export function SettingsModal(props: Props) {
           type="button"
           className="modal__close"
           onClick={onClose}
-          aria-label="설정 닫기"
+          aria-label="설정"
         >
           ✕
         </button>
@@ -215,18 +221,18 @@ export function SettingsModal(props: Props) {
                 <button
                   type="button"
                   onClick={decreaseFont}
-                  disabled={fontScale <= minFont + 0.01}
+                  disabled={fontScale <= minFont + fontStep / 2}
                   className="font-controls__button"
                 >
                   Aa-
                 </button>
                 <span className="font-controls__value">
-                  {Math.round(fontScale * 100)}%
+                  {displayPercent}%
                 </span>
                 <button
                   type="button"
                   onClick={increaseFont}
-                  disabled={fontScale >= maxFont - 0.01}
+                  disabled={fontScale >= maxFont - fontStep / 2}
                   className="font-controls__button"
                 >
                   Aa+
@@ -312,7 +318,7 @@ export function SettingsModal(props: Props) {
                       type="checkbox"
                       checked={showFurigana}
                       onChange={toggleFurigana}
-                      disabled={!japaneseDataReady || !showJapanese}
+                      disabled={!japaneseDataReady}
                     />
                     <span className="toggle__indicator" />
                   </span>
@@ -323,8 +329,7 @@ export function SettingsModal(props: Props) {
                 <>
                   <div className="settings__action-row">
                     <p className="settings__hint">
-                      일본어 성경 데이터({japaneseDataSizeLabel})는 직접
-                      다운로드 후 사용할 수 있습니다.
+                      일본어 성경 데이터({japaneseDataSizeLabel})는 직접 다운로드 후 사용할 수 있습니다.
                     </p>
                     <button
                       type="button"
@@ -371,8 +376,7 @@ export function SettingsModal(props: Props) {
                 <>
                   <div className="settings__action-row">
                     <p className="settings__hint">
-                      이탈리아어 성경 데이터는 기본 포함되지 않습니다.{" "}
-                      {italianDataSizeLabel} 내려받은 후 사용할 수 있습니다.
+                      이탈리아어 성경 데이터({italianDataSizeLabel})는 직접 다운로드 후 사용할 수 있습니다.
                     </p>
                     <button
                       type="button"
@@ -432,6 +436,11 @@ export function SettingsModal(props: Props) {
                 구어역 성경의 루비(후리가나) 포함 전자본으로, 퍼블릭 도메인으로
                 공개되어 있습니다. 원 출판사인 일본성서협회(Japan Bible
                 Society)의 저작권 고지를 존중하며 안내용으로 제공합니다.
+              </p>
+              <p style={{ margin: "0.5rem 0 0" }}>
+                <strong>La Sacra Bibbia Riveduta 1927 (Italiano)</strong>은
+                Società Biblica di Ginevra가 배포한 Riveduta 1927 판본으로,
+                퍼블릭 도메인에 해당합니다.
               </p>
               <p style={{ margin: "0.5rem 0 0" }}>
                 데이터는 최초 접속 시 내려받아 기기에 저장되며, 이후에는

@@ -27,10 +27,14 @@ export type Selection = {
 
 export type Theme = 'light' | 'dark' | 'amoled'
 
+export type TranslationId = 'kor' | 'kjv' | 'ja' | 'ita'
+
 export type SearchResult = {
   bookNumber: number
   bookTitle: string
   chapter: number
   verse: number
   text: string
+  translation: string
+  translationId: TranslationId
 }

@@ -269,6 +269,13 @@
   transform: translateY(-1px);
 }
 
+.search-hint {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
 /* 검색 범위 라디오: 간격 개선 */
 .search-scope {
   display: flex;
@@ -456,10 +463,20 @@
 }
 
 .verse-highlight {
+  position: relative;
+  z-index: 0;
+}
+
+.verse-highlight::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 14px;
   background: var(--color-highlight);
-  border-radius: 12px;
-  padding: 0.4rem 0.6rem;
-  margin: -0.4rem -0.6rem;
+  opacity: 0.9;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity 200ms ease;
 }
 
 .empty-state {
@@ -546,6 +563,13 @@
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--color-text-secondary);
+}
+
+.result-meta__translation {
+  margin-left: 0.35rem;
+  font-weight: 500;
+  color: var(--color-accent-strong);
+  font-size: 0.8rem;
 }
 
 .result-text {

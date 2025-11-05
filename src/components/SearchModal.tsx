@@ -1,7 +1,6 @@
 import { Modal } from './Modal'
-import type { SearchResult } from '../types/bible'
 import { useRef } from 'react'
-import type { Book } from '../types/bible'
+import type { Book, SearchResult } from '../types/bible'
 
 type Props = {
   open: boolean
@@ -21,7 +20,7 @@ type Props = {
   onClickResult: (r: SearchResult) => void
   toggleButtonRef: React.RefObject<HTMLButtonElement | null>
   searchLimit: number
-  koreanDataReady: boolean
+  searchReady: boolean
   lastSearchedQuery: string
 }
 
@@ -33,7 +32,7 @@ export function SearchModal(props: Props) {
     searchBookNumber, setSearchBookNumber,
     books,
     searching, searchResults,
-    onSubmit, onClickResult, toggleButtonRef, searchLimit, koreanDataReady, lastSearchedQuery
+    onSubmit, onClickResult, toggleButtonRef, searchLimit, searchReady, lastSearchedQuery
   } = props
   return (
     <Modal open={open} titleId="search-dialog-title" onClose={onClose} initialFocusRef={inputRef} toggleButtonRef={toggleButtonRef}>
@@ -52,12 +51,17 @@ export function SearchModal(props: Props) {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="단어 또는 구절을 입력하세요"
-              disabled={!koreanDataReady}
+              disabled={!searchReady}
             />
-            <button type="submit" disabled={!koreanDataReady || searching} className="search-button">
+            <button type="submit" disabled={!searchReady || searching} className="search-button">
               찾기
             </button>
           </div>
+          {!searchReady && (
+            <p className="search-hint">
+              검색 가능한 번역이 없습니다. 설정에서 언어 데이터를 내려받아 주세요.
+            </p>
+          )}
           <fieldset className="search-scope" aria-label="검색 범위">
             <legend className="sr-only">검색 범위</legend>
             <label className="radio">
@@ -95,7 +99,7 @@ export function SearchModal(props: Props) {
                 const v = e.target.value
                 setSearchBookNumber(v ? Number(v) : null)
               }}
-              disabled={!koreanDataReady}
+              disabled={!searchReady}
             >
               <option value="">전체 책</option>
               {books.map((b) => (
@@ -117,10 +121,11 @@ export function SearchModal(props: Props) {
           )}
           <ul className="search-results__list">
             {searchResults.map((result) => (
-              <li key={`${result.bookNumber}-${result.chapter}-${result.verse}`}>
+              <li key={`${result.translationId}-${result.bookNumber}-${result.chapter}-${result.verse}`}>
                 <button type="button" onClick={() => onClickResult(result)} className="result-button">
                   <span className="result-meta">
                     {result.bookTitle} {result.chapter}:{result.verse}
+                    <span className="result-meta__translation">{result.translation}</span>
                   </span>
                   <span className="result-text">{result.text}</span>
                 </button>

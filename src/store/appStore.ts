@@ -2,9 +2,10 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { Selection, Theme, SearchResult } from "../types/bible";
 
-const MIN_FONT_SCALE = 0.85;
-const MAX_FONT_SCALE = 1.4;
-const FONT_STEP = 0.1;
+const BASE_FONT_SCALE = 1.1;
+const MIN_FONT_SCALE = Number((BASE_FONT_SCALE * 0.8).toFixed(3)); // 0.88
+const MAX_FONT_SCALE = Number((BASE_FONT_SCALE * 1.4).toFixed(3)); // 1.54
+const FONT_STEP = Number((BASE_FONT_SCALE * 0.05).toFixed(3)); // 0.055
 
 export type FocusTarget = (Selection & { verse: number }) | null;
 
@@ -94,7 +95,7 @@ export const useAppStore = create<AppState>()(
 
       theme: getInitialTheme(),
       manualTheme: false,
-      fontScale: 1.1,
+      fontScale: BASE_FONT_SCALE,
       showKorean: true,
       showEnglish: true,
       showJapanese: false,
@@ -108,7 +109,7 @@ export const useAppStore = create<AppState>()(
       showSettings: false,
       query: "",
       searchScope: "all",
-  searchBookNumber: null,
+      searchBookNumber: null,
       searchResults: [],
       searching: false,
       lastSearchedQuery: "",
@@ -130,21 +131,21 @@ export const useAppStore = create<AppState>()(
         set({
           fontScale: Math.min(
             MAX_FONT_SCALE,
-            Math.max(MIN_FONT_SCALE, Number(v.toFixed(2)))
+            Math.max(MIN_FONT_SCALE, Number(v.toFixed(3)))
           ),
         }),
       increaseFont: () =>
         set((s: AppState) => ({
           fontScale: Math.min(
             MAX_FONT_SCALE,
-            Number((s.fontScale + FONT_STEP).toFixed(2))
+            Number((s.fontScale + FONT_STEP).toFixed(3))
           ),
         })),
       decreaseFont: () =>
         set((s: AppState) => ({
           fontScale: Math.max(
             MIN_FONT_SCALE,
-            Number((s.fontScale - FONT_STEP).toFixed(2))
+            Number((s.fontScale - FONT_STEP).toFixed(3))
           ),
         })),
 
@@ -174,7 +175,8 @@ export const useAppStore = create<AppState>()(
 
       setQuery: (q: string) => set({ query: q }),
       setSearchScope: (v: "all" | "ot" | "nt") => set({ searchScope: v }),
-  setSearchBookNumber: (n: number | null) => set({ searchBookNumber: n }),
+      setSearchBookNumber: (n: number | null) =>
+        set({ searchBookNumber: n }),
       setSearchResults: (r: SearchResult[]) => set({ searchResults: r }),
       setSearching: (v: boolean) => set({ searching: v }),
       setLastSearchedQuery: (q: string) => set({ lastSearchedQuery: q }),

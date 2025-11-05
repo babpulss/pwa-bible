@@ -1,6 +1,6 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
-import type { Selection, SearchResult, Theme } from './types/bible'
+import type { Selection, SearchResult, Theme, TranslationId, BibleData } from './types/bible'
 import { useBibleTranslation } from './hooks/useBibleTranslation'
 import './App.css'
 import { useAppStore } from './store/appStore'
@@ -15,9 +15,10 @@ const SHOW_ENGLISH_KEY = 'simple-bible:show-english'
 const SHOW_JAPANESE_KEY = 'simple-bible:show-japanese'
 const SHOW_FURIGANA_KEY = 'simple-bible:show-furigana'
 const SEARCH_LIMIT = 120
-const MIN_FONT_SCALE = 0.85
-const MAX_FONT_SCALE = 1.4
-const FONT_STEP = 0.1
+const BASE_FONT_SCALE = 1.1
+const MIN_FONT_SCALE = Number((BASE_FONT_SCALE * 0.8).toFixed(3))
+const MAX_FONT_SCALE = Number((BASE_FONT_SCALE * 1.4).toFixed(3))
+const FONT_STEP = Number((BASE_FONT_SCALE * 0.05).toFixed(3))
 const THEME_COLORS: Record<Theme, string> = {
   light: '#f4f5f7',
   dark: '#0f1118',
@@ -98,6 +99,7 @@ function App() {
   const settingsToggleRef = useRef<HTMLButtonElement | null>(null)
   const searchTimeoutRef = useRef<number | null>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
+  const normalizedFontScaleRef = useRef(false)
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null)
 
   const {
@@ -158,6 +160,88 @@ function App() {
     : null
   const japaneseLoadError = !japaneseDataAllowed || koreanError ? null : japaneseDownloadError
   const italianLoadError = !italianDataAllowed || koreanError ? null : italianDownloadError
+
+  const hasJapaneseAutoEnabledRef = useRef<boolean>(japaneseDataReady)
+  const hasItalianAutoEnabledRef = useRef<boolean>(italianDataReady)
+
+  const activeTranslationNames = useMemo(() => {
+    const names: string[] = []
+    if (showKorean && koreanData) {
+      names.push(koreanData.translation)
+    }
+    if (showEnglish && englishData) {
+      names.push(englishData.translation ?? 'KJV')
+    }
+    if (showJapanese && japaneseDataReady && japaneseData) {
+      names.push(japaneseData.translation ?? '日本語聖書')
+    }
+    if (showItalian && italianDataReady && italianData) {
+      names.push(italianData.translation ?? 'Italiano 1927')
+    }
+    return names
+  }, [
+    showKorean,
+    koreanData,
+    showEnglish,
+    englishData,
+    showJapanese,
+    japaneseDataReady,
+    japaneseData,
+    showItalian,
+    italianDataReady,
+    italianData
+  ])
+
+  const searchSources = useMemo(() => {
+    const sources: Array<{ id: TranslationId; label: string; data: BibleData }> = []
+    if (koreanData) {
+      sources.push({
+        id: 'kor',
+        label: koreanData.translation ?? '한국어',
+        data: koreanData
+      })
+    }
+    if (englishData) {
+      sources.push({
+        id: 'kjv',
+        label: englishData.translation ?? 'KJV',
+        data: englishData
+      })
+    }
+    if (japaneseDataReady && japaneseData) {
+      sources.push({
+        id: 'ja',
+        label: japaneseData.translation ?? '日本語聖書',
+        data: japaneseData
+      })
+    }
+    if (italianDataReady && italianData) {
+      sources.push({
+        id: 'ita',
+        label: italianData.translation ?? 'Italiano 1927',
+        data: italianData
+      })
+    }
+    return sources
+  }, [koreanData, englishData, japaneseDataReady, japaneseData, italianDataReady, italianData])
+
+  const searchReady = searchSources.length > 0
+
+  const searchBooks = useMemo(() => {
+    if (koreanData) {
+      return koreanData.books
+    }
+    return searchSources[0]?.data.books ?? []
+  }, [koreanData, searchSources])
+
+  useEffect(() => {
+    if (!normalizedFontScaleRef.current) {
+      normalizedFontScaleRef.current = true
+      if (Math.abs(fontScale - 1) < 0.0005) {
+        setFontScale(BASE_FONT_SCALE)
+      }
+    }
+  }, [fontScale, setFontScale])
 
   const wakeLockSupported = typeof navigator !== 'undefined' && !!navigator.wakeLock
 
@@ -363,6 +447,24 @@ function App() {
   }, [italianDataAllowed, showItalian, setShowItalian])
 
   useEffect(() => {
+    if (japaneseDataReady && !hasJapaneseAutoEnabledRef.current) {
+      hasJapaneseAutoEnabledRef.current = true
+      setShowJapanese(true)
+    } else if (!japaneseDataReady) {
+      hasJapaneseAutoEnabledRef.current = false
+    }
+  }, [japaneseDataReady, setShowJapanese])
+
+  useEffect(() => {
+    if (italianDataReady && !hasItalianAutoEnabledRef.current) {
+      hasItalianAutoEnabledRef.current = true
+      setShowItalian(true)
+    } else if (!italianDataReady) {
+      hasItalianAutoEnabledRef.current = false
+    }
+  }, [italianDataReady, setShowItalian])
+
+  useEffect(() => {
     if (typeof window === 'undefined') {
       return
     }
@@ -472,6 +574,15 @@ function App() {
     return italianBook.chapters[chapterIndex] ?? null
   }, [italianBook, chapterIndex, showItalian])
 
+  const currentBookTitle = currentBook?.title ?? ''
+  const headerTranslationSegments = useMemo(() => {
+    const segments = [...activeTranslationNames]
+    if (currentBookTitle) {
+      segments.push(currentBookTitle)
+    }
+    return segments
+  }, [activeTranslationNames, currentBookTitle])
+
   useEffect(() => {
     if (!currentChapter) {
       setSelectedVerse(null)
@@ -549,10 +660,7 @@ function App() {
   }, [activeColumns])
 
   const adjustFontScale = (delta: number) => {
-    const next = Math.min(
-      MAX_FONT_SCALE,
-      Math.max(MIN_FONT_SCALE, Number((fontScale + delta).toFixed(2)))
-    )
+    const next = Number((fontScale + delta).toFixed(3))
     setFontScale(next)
   }
 
@@ -641,8 +749,8 @@ function App() {
         searchTimeoutRef.current = null
       }
       setSearching(false)
-  setSearchResults([])
-  setQuery('')
+      setSearchResults([])
+      setQuery('')
       setLastSearchedQuery('')
     } else {
       setShowSettings(false)
@@ -653,7 +761,7 @@ function App() {
   // Theme toggling is handled in SettingsModal
 
   const runSearch = useCallback((term: string) => {
-    if (!koreanData) {
+    if (searchSources.length === 0) {
       return
     }
     if (searchTimeoutRef.current !== null) {
@@ -668,32 +776,43 @@ function App() {
     setSearching(true)
     const timeoutId = window.setTimeout(() => {
       const results: SearchResult[] = []
-      for (const book of koreanData.books) {
-        // Book filter has highest priority
-        if (searchBookNumber && book.number !== searchBookNumber) continue
-        // scope filter: ot(<=39), nt(>=40)
-        if (searchScope === 'ot' && book.number > 39) continue
-        if (searchScope === 'nt' && book.number <= 39) continue
-        for (const chapter of book.chapters) {
-          for (const verse of chapter.verses) {
-            if (verse.text.includes(term)) {
-              results.push({
-                bookNumber: book.number,
-                bookTitle: book.title,
-                chapter: chapter.number,
-                verse: verse.number,
-                text: verse.text
-              })
-              if (results.length >= SEARCH_LIMIT) {
-                break
+      let reachedLimit = false
+      for (const source of searchSources) {
+        for (const book of source.data.books) {
+          // Book filter has highest priority
+          if (searchBookNumber && book.number !== searchBookNumber) continue
+          // scope filter: ot(<=39), nt(>=40)
+          if (searchScope === 'ot' && book.number > 39) continue
+          if (searchScope === 'nt' && book.number <= 39) continue
+          for (const chapter of book.chapters) {
+            for (const verse of chapter.verses) {
+              if (verse.text.includes(term)) {
+                const koreanBookTitle =
+                  koreanData?.books.find((b) => b.number === book.number)?.title
+                results.push({
+                  bookNumber: book.number,
+                  bookTitle: koreanBookTitle ?? book.title,
+                  chapter: chapter.number,
+                  verse: verse.number,
+                  text: verse.text,
+                  translation: source.label,
+                  translationId: source.id
+                })
+                if (results.length >= SEARCH_LIMIT) {
+                  reachedLimit = true
+                  break
+                }
               }
             }
+            if (reachedLimit) {
+              break
+            }
           }
-          if (results.length >= SEARCH_LIMIT) {
+          if (reachedLimit) {
             break
           }
         }
-        if (results.length >= SEARCH_LIMIT) {
+        if (reachedLimit) {
           break
         }
       }
@@ -703,7 +822,15 @@ function App() {
       searchTimeoutRef.current = null
     }, 0)
     searchTimeoutRef.current = timeoutId
-  }, [koreanData, searchScope, searchBookNumber, setSearchResults, setSearching, setLastSearchedQuery])
+  }, [
+    searchSources,
+    searchScope,
+    searchBookNumber,
+    setSearchResults,
+    setSearching,
+    setLastSearchedQuery,
+    koreanData
+  ])
 
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -711,14 +838,29 @@ function App() {
     runSearch(term)
   }
 
+  useEffect(() => {
+    if (searchReady) {
+      return
+    }
+    setSearching(false)
+    setSearchResults([])
+  }, [searchReady, setSearchResults, setSearching])
+
   // 범위/책 변경 시에는 마지막 검색어 기준으로 즉시 재검색
   useEffect(() => {
     if (!showSearch) return
-    if (!koreanData) return
+    if (!searchReady) return
     const term = lastSearchedQuery.trim()
     if (!term) return
     runSearch(term)
-  }, [searchScope, searchBookNumber, lastSearchedQuery, showSearch, koreanData, runSearch])
+  }, [
+    searchScope,
+    searchBookNumber,
+    lastSearchedQuery,
+    showSearch,
+    searchReady,
+    runSearch
+  ])
 
   const handleResultClick = (result: SearchResult) => {
     if (!koreanData) {
@@ -780,11 +922,6 @@ function App() {
       <header className="app-header">
         <div>
           <h1>오프라인 성경</h1>
-          <p className="translation">
-            {koreanData
-              ? `${koreanData.translation} • ${currentBook?.title ?? ''}`
-              : '데이터 불러오는 중'}
-          </p>
         </div>
         <div className="header-actions">
           <button
@@ -825,10 +962,10 @@ function App() {
             }}
             aria-pressed={showSettings}
             aria-expanded={showSettings}
-            title={showSettings ? '설정 닫기' : '설정 열기'}
+            title='설정'
           >
             <span className="header-button__icon" aria-hidden="true">⚙️</span>
-            <span>{showSettings ? '설정 닫기' : '설정'}</span>
+            <span>설정</span>
           </button>
         </div>
       </header>
@@ -1023,14 +1160,14 @@ function App() {
         setSearchScope={setSearchScope}
         searchBookNumber={searchBookNumber}
         setSearchBookNumber={setSearchBookNumber}
-        books={koreanData?.books ?? []}
+        books={searchBooks}
         searching={searching}
         searchResults={searchResults}
         onSubmit={handleSearch}
         onClickResult={handleResultClick}
         toggleButtonRef={searchToggleRef}
         searchLimit={SEARCH_LIMIT}
-        koreanDataReady={!!koreanData}
+        searchReady={searchReady}
         lastSearchedQuery={lastSearchedQuery}
       />
 
@@ -1047,6 +1184,8 @@ function App() {
         decreaseFont={decreaseFont}
         minFont={MIN_FONT_SCALE}
         maxFont={MAX_FONT_SCALE}
+        baseFont={BASE_FONT_SCALE}
+        fontStep={FONT_STEP}
         wakeLockEnabled={wakeLockEnabled}
         setWakeLockEnabled={setWakeLockEnabled}
         wakeLockSupported={wakeLockSupported}
