@@ -1,6 +1,7 @@
 import { Modal } from './Modal'
 import { useRef } from 'react'
 import type { Book, SearchResult } from '../types/bible'
+import { SEARCH_LIMIT } from '../config/appConstants'
 
 type Props = {
   open: boolean
@@ -19,7 +20,6 @@ type Props = {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
   onClickResult: (r: SearchResult) => void
   toggleButtonRef: React.RefObject<HTMLButtonElement | null>
-  searchLimit: number
   searchReady: boolean
   lastSearchedQuery: string
 }
@@ -32,7 +32,7 @@ export function SearchModal(props: Props) {
     searchBookNumber, setSearchBookNumber,
     books,
     searching, searchResults,
-    onSubmit, onClickResult, toggleButtonRef, searchLimit, searchReady, lastSearchedQuery
+    onSubmit, onClickResult, toggleButtonRef, searchReady, lastSearchedQuery
   } = props
   return (
     <Modal open={open} titleId="search-dialog-title" onClose={onClose} initialFocusRef={inputRef} toggleButtonRef={toggleButtonRef}>
@@ -131,8 +131,8 @@ export function SearchModal(props: Props) {
                 </button>
               </li>
             ))}
-            {searchResults.length >= searchLimit && (
-              <li className="hint">검색 결과가 많아 {searchLimit}개만 표시합니다.</li>
+            {searchResults.length >= SEARCH_LIMIT && (
+              <li className="hint">검색 결과가 많아 {SEARCH_LIMIT}개만 표시합니다.</li>
             )}
           </ul>
         </div>

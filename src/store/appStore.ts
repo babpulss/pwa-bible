@@ -1,11 +1,12 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { Selection, Theme, SearchResult } from "../types/bible";
-
-const BASE_FONT_SCALE = 1.1;
-const MIN_FONT_SCALE = Number((BASE_FONT_SCALE * 0.8).toFixed(3)); // 0.88
-const MAX_FONT_SCALE = Number((BASE_FONT_SCALE * 1.4).toFixed(3)); // 1.54
-const FONT_STEP = Number((BASE_FONT_SCALE * 0.05).toFixed(3)); // 0.055
+import {
+  BASE_FONT_SCALE,
+  MIN_FONT_SCALE,
+  MAX_FONT_SCALE,
+  FONT_STEP,
+} from "../config/appConstants";
 
 export type FocusTarget = (Selection & { verse: number }) | null;
 

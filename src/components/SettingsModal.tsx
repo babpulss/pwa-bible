@@ -1,5 +1,13 @@
 import { Modal } from "./Modal";
 import type { Theme } from "../types/bible";
+import {
+  BASE_FONT_SCALE,
+  FONT_STEP,
+  ITALIAN_DATA_SIZE_LABEL,
+  JAPANESE_DATA_SIZE_LABEL,
+  MAX_FONT_SCALE,
+  MIN_FONT_SCALE,
+} from "../config/appConstants";
 
 type Props = {
   open: boolean;
@@ -12,10 +20,6 @@ type Props = {
   fontScale: number;
   increaseFont: () => void;
   decreaseFont: () => void;
-  minFont: number;
-  maxFont: number;
-  baseFont: number;
-  fontStep: number;
   wakeLockEnabled: boolean;
   setWakeLockEnabled: (v: boolean) => void;
   wakeLockSupported: boolean;
@@ -33,12 +37,10 @@ type Props = {
   japaneseDownloadInProgress: boolean;
   japaneseDownloadError: string | null;
   onDownloadJapanese: () => void;
-  japaneseDataSizeLabel: string;
   italianDataReady: boolean;
   italianDownloadInProgress: boolean;
   italianDownloadError: string | null;
   onDownloadItalian: () => void;
-  italianDataSizeLabel: string;
   offlineReady: boolean;
   isPending: boolean;
   loadError: string | null;
@@ -58,10 +60,6 @@ export function SettingsModal(props: Props) {
     fontScale,
     increaseFont,
     decreaseFont,
-    minFont,
-    maxFont,
-    baseFont,
-    fontStep,
     wakeLockEnabled,
     setWakeLockEnabled,
     wakeLockSupported,
@@ -79,12 +77,10 @@ export function SettingsModal(props: Props) {
     japaneseDownloadInProgress,
     japaneseDownloadError,
     onDownloadJapanese,
-    japaneseDataSizeLabel,
     italianDataReady,
     italianDownloadInProgress,
     italianDownloadError,
     onDownloadItalian,
-    italianDataSizeLabel,
     offlineReady,
     isPending,
     loadError,
@@ -92,7 +88,7 @@ export function SettingsModal(props: Props) {
     japaneseLoadError,
   } = props;
 
-  const displayPercent = Math.round((fontScale / baseFont) * 20 + 1e-6) * 5;
+  const displayPercent = Math.round((fontScale / BASE_FONT_SCALE) * 20 + 1e-6) * 5;
 
   return (
     <Modal
@@ -221,7 +217,7 @@ export function SettingsModal(props: Props) {
                 <button
                   type="button"
                   onClick={decreaseFont}
-                  disabled={fontScale <= minFont + fontStep / 2}
+                  disabled={fontScale <= MIN_FONT_SCALE + FONT_STEP / 2}
                   className="font-controls__button"
                 >
                   Aa-
@@ -232,7 +228,7 @@ export function SettingsModal(props: Props) {
                 <button
                   type="button"
                   onClick={increaseFont}
-                  disabled={fontScale >= maxFont - fontStep / 2}
+                  disabled={fontScale >= MAX_FONT_SCALE - FONT_STEP / 2}
                   className="font-controls__button"
                 >
                   Aa+
@@ -329,7 +325,7 @@ export function SettingsModal(props: Props) {
                 <>
                   <div className="settings__action-row">
                     <p className="settings__hint">
-                      일본어 성경 데이터({japaneseDataSizeLabel})는 직접 다운로드 후 사용할 수 있습니다.
+                      일본어 성경 데이터({JAPANESE_DATA_SIZE_LABEL})는 직접 다운로드 후 사용할 수 있습니다.
                     </p>
                     <button
                       type="button"
@@ -376,7 +372,7 @@ export function SettingsModal(props: Props) {
                 <>
                   <div className="settings__action-row">
                     <p className="settings__hint">
-                      이탈리아어 성경 데이터({italianDataSizeLabel})는 직접 다운로드 후 사용할 수 있습니다.
+                      이탈리아어 성경 데이터({ITALIAN_DATA_SIZE_LABEL})는 직접 다운로드 후 사용할 수 있습니다.
                     </p>
                     <button
                       type="button"
