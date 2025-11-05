@@ -54,8 +54,7 @@ frontend/
     hooks/useBibleTranslation.ts # TanStack Query 기반 번역 본문 로드 훅
     types/bible.ts              # 성경/검색 관련 타입 정의
     vite-env.d.ts            # Vite/PWA 타입 선언
-  tailwind.config.js        # Tailwind 테마/스캔 설정
-  postcss.config.js          # PostCSS + Tailwind 플러그인 설정
+  postcss.config.js          # PostCSS + Autoprefixer 설정
   vite.config.ts             # vite-plugin-pwa 설정
 ```
 

@@ -88,7 +88,8 @@ export function SettingsModal(props: Props) {
     japaneseLoadError,
   } = props;
 
-  const displayPercent = Math.round((fontScale / BASE_FONT_SCALE) * 20 + 1e-6) * 5;
+  const displayPercent =
+    Math.round((fontScale / BASE_FONT_SCALE) * 20 + 1e-6) * 5;
 
   return (
     <Modal
@@ -193,10 +194,10 @@ export function SettingsModal(props: Props) {
                     <input
                       type="radio"
                       name="theme-option"
-                      checked={manualTheme && theme === "amoled"}
+                      checked={manualTheme && theme === "highContrast"}
                       onChange={() => {
                         setManualTheme(true);
-                        setTheme("amoled");
+                        setTheme("highContrast");
                       }}
                     />
                     <span>고대비</span>
@@ -222,9 +223,7 @@ export function SettingsModal(props: Props) {
                 >
                   Aa-
                 </button>
-                <span className="font-controls__value">
-                  {displayPercent}%
-                </span>
+                <span className="font-controls__value">{displayPercent}%</span>
                 <button
                   type="button"
                   onClick={increaseFont}
@@ -325,7 +324,8 @@ export function SettingsModal(props: Props) {
                 <>
                   <div className="settings__action-row">
                     <p className="settings__hint">
-                      일본어 성경 데이터({JAPANESE_DATA_SIZE_LABEL})는 직접 다운로드 후 사용할 수 있습니다.
+                      일본어 성경 데이터({JAPANESE_DATA_SIZE_LABEL})는 직접
+                      다운로드 후 사용할 수 있습니다.
                     </p>
                     <button
                       type="button"
@@ -372,7 +372,8 @@ export function SettingsModal(props: Props) {
                 <>
                   <div className="settings__action-row">
                     <p className="settings__hint">
-                      이탈리아어 성경 데이터({ITALIAN_DATA_SIZE_LABEL})는 직접 다운로드 후 사용할 수 있습니다.
+                      이탈리아어 성경 데이터({ITALIAN_DATA_SIZE_LABEL})는 직접
+                      다운로드 후 사용할 수 있습니다.
                     </p>
                     <button
                       type="button"

@@ -1,49 +1,46 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @font-face {
-  font-family: 'Noto Sans KR';
-  src: url('/fonts/NotoSansKR-Regular.woff2') format('woff2');
+  font-family: "Noto Sans KR";
+  src: url("/fonts/NotoSansKR-Regular.woff2") format("woff2");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Noto Sans KR';
-  src: url('/fonts/NotoSansKR-Medium.woff2') format('woff2');
+  font-family: "Noto Sans KR";
+  src: url("/fonts/NotoSansKR-Medium.woff2") format("woff2");
   font-style: normal;
   font-weight: 500;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Noto Sans KR';
-  src: url('/fonts/NotoSansKR-SemiBold.woff2') format('woff2');
+  font-family: "Noto Sans KR";
+  src: url("/fonts/NotoSansKR-SemiBold.woff2") format("woff2");
   font-style: normal;
   font-weight: 600;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Noto Serif KR';
-  src: url('/fonts/NotoSerifKR-Regular.woff2') format('woff2');
+  font-family: "Noto Serif KR";
+  src: url("/fonts/NotoSerifKR-Regular.woff2") format("woff2");
   font-style: normal;
   font-weight: 400;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Noto Serif KR';
-  src: url('/fonts/NotoSerifKR-SemiBold.woff2') format('woff2');
+  font-family: "Noto Serif KR";
+  src: url("/fonts/NotoSerifKR-SemiBold.woff2") format("woff2");
   font-style: normal;
   font-weight: 600;
   font-display: swap;
 }
 
 :root {
-  font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
+  font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic",
+    "Segoe UI", sans-serif;
   line-height: 1.6;
   font-weight: 400;
   font-synthesis: none;
@@ -78,13 +75,14 @@
   --color-badge-error-text: #ae2d2d;
   --shadow-soft: 0 12px 32px rgba(15, 23, 42, 0.05);
   --shadow-strong: 0 18px 40px rgba(15, 23, 42, 0.06);
-  --font-ui: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
-  --font-heading: 'Noto Serif KR', 'Apple SD Gothic Neo', 'Malgun Gothic', serif;
-  --font-reading: 'Noto Serif KR', 'Apple SD Gothic Neo', 'Malgun Gothic', serif;
+  --font-ui: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI",
+    sans-serif;
+  --font-heading: "Noto Serif KR", "Apple SD Gothic Neo", "Malgun Gothic", serif;
+  --font-reading: "Noto Serif KR", "Apple SD Gothic Neo", "Malgun Gothic", serif;
   --reader-font-scale: 1.1;
 }
 
-[data-theme='dark'] {
+[data-theme="dark"] {
   color-scheme: dark;
 
   --color-bg: #0f1118;
@@ -113,13 +111,14 @@
   --color-badge-error-text: #f1a7a7;
   --shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.45);
   --shadow-strong: 0 18px 40px rgba(0, 0, 0, 0.55);
-  --font-ui: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
-  --font-heading: 'Noto Serif KR', 'Apple SD Gothic Neo', 'Malgun Gothic', serif;
-  --font-reading: 'Noto Serif KR', 'Apple SD Gothic Neo', 'Malgun Gothic', serif;
+  --font-ui: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI",
+    sans-serif;
+  --font-heading: "Noto Serif KR", "Apple SD Gothic Neo", "Malgun Gothic", serif;
+  --font-reading: "Noto Serif KR", "Apple SD Gothic Neo", "Malgun Gothic", serif;
 }
 
-/* AMOLED high-contrast theme: true black backgrounds for OLED screens */
-[data-theme='amoled'] {
+/* highContrast highContrast theme: true black backgrounds for OLED screens */
+[data-theme="highContrast"] {
   color-scheme: dark;
 
   --color-bg: #000000;
@@ -148,9 +147,10 @@
   --color-badge-error-text: #ffb5b5;
   --shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.6);
   --shadow-strong: 0 18px 40px rgba(0, 0, 0, 0.7);
-  --font-ui: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', sans-serif;
-  --font-heading: 'Noto Serif KR', 'Apple SD Gothic Neo', 'Malgun Gothic', serif;
-  --font-reading: 'Noto Serif KR', 'Apple SD Gothic Neo', 'Malgun Gothic', serif;
+  --font-ui: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI",
+    sans-serif;
+  --font-heading: "Noto Serif KR", "Apple SD Gothic Neo", "Malgun Gothic", serif;
+  --font-reading: "Noto Serif KR", "Apple SD Gothic Neo", "Malgun Gothic", serif;
 }
 
 *,

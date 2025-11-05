@@ -151,8 +151,7 @@ export const useAppStore = create<AppState>()(
         })),
 
       setShowKorean: (v: boolean) => set({ showKorean: v }),
-      toggleKorean: () =>
-        set((s: AppState) => ({ showKorean: !s.showKorean })),
+      toggleKorean: () => set((s: AppState) => ({ showKorean: !s.showKorean })),
       setShowEnglish: (v: boolean) => set({ showEnglish: v }),
       toggleEnglish: () =>
         set((s: AppState) => ({ showEnglish: !s.showEnglish })),
@@ -176,8 +175,7 @@ export const useAppStore = create<AppState>()(
 
       setQuery: (q: string) => set({ query: q }),
       setSearchScope: (v: "all" | "ot" | "nt") => set({ searchScope: v }),
-      setSearchBookNumber: (n: number | null) =>
-        set({ searchBookNumber: n }),
+      setSearchBookNumber: (n: number | null) => set({ searchBookNumber: n }),
       setSearchResults: (r: SearchResult[]) => set({ searchResults: r }),
       setSearching: (v: boolean) => set({ searching: v }),
       setLastSearchedQuery: (q: string) => set({ lastSearchedQuery: q }),

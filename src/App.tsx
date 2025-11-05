@@ -6,8 +6,6 @@ import { SettingsModal } from "./components/SettingsModal";
 import {
   BASE_FONT_SCALE,
   FONT_STEP,
-  MAX_FONT_SCALE,
-  MIN_FONT_SCALE,
   SEARCH_LIMIT,
   STORAGE_KEY,
 } from "./config/appConstants";
@@ -171,34 +169,6 @@ function App() {
     !japaneseDataAllowed || koreanError ? null : japaneseDownloadError;
   const italianLoadError =
     !italianDataAllowed || koreanError ? null : italianDownloadError;
-
-  const activeTranslationNames = useMemo(() => {
-    const names: string[] = [];
-    if (showKorean && koreanData) {
-      names.push(koreanData.translation);
-    }
-    if (showEnglish && englishData) {
-      names.push(englishData.translation ?? "KJV");
-    }
-    if (showJapanese && japaneseDataReady && japaneseData) {
-      names.push(japaneseData.translation ?? "日本語聖書");
-    }
-    if (showItalian && italianDataReady && italianData) {
-      names.push(italianData.translation ?? "Italiano 1927");
-    }
-    return names;
-  }, [
-    showKorean,
-    koreanData,
-    showEnglish,
-    englishData,
-    showJapanese,
-    japaneseDataReady,
-    japaneseData,
-    showItalian,
-    italianDataReady,
-    italianData,
-  ]);
 
   const searchSources = useMemo(() => {
     const sources: Array<{
