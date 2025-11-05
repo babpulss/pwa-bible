@@ -176,7 +176,6 @@ export function SettingsModal(props: Props) {
                       type="checkbox"
                       checked={showFurigana}
                       onChange={toggleFurigana}
-                      disabled={!showJapanese}
                     />
                     <span className="toggle__indicator" />
                   </span>
@@ -205,18 +204,27 @@ export function SettingsModal(props: Props) {
             </div>
           </div>
         </div>
-        <div className="settings__row" id="license-info">
-          <div className="settings__label">정보</div>
-          <div className="settings__control">
+        <div className="settings__row settings__row--info" id="license-info">
+          <div className="settings__label settings__label--top">정보</div>
+          <div className="settings__control settings__control--info">
             <div className="settings__info">
               <p style={{ margin: 0 }}>
-                저작권 안내: 개역한글(대한성서공회) 본문은 대한성서공회가 제공한 공개 사용 안내 범위
-                내에서 자유롭게 이용할 수 있습니다(자세한 조건은 저작권 안내 참고). King James
-                Version(KJV)은 퍼블릭 도메인으로 자유롭게 사용 및 배포할 수 있습니다. 口語訳聖書
-                (1955年版ルビ付き) 역시 퍼블릭 도메인 자료입니다.
+                <strong>개역한글(대한성서공회)</strong> 본문은 대한성서공회의 공개 사용 안내에 따라
+                예배·연구 목적으로 제공합니다. 자세한 조건과 허용 범위는 대한성서공회 저작권 안내를
+                참고해 주세요.
               </p>
-              <p style={{ margin: '0.35rem 0 0' }}>
-                데이터는 최초 접속 시 한 번 내려받아 이후 오프라인에서도 사용할 수 있습니다.
+              <p style={{ margin: '0.5rem 0 0' }}>
+                <strong>King James Version</strong>은 퍼블릭 도메인으로 누구나 자유롭게 이용하고
+                재배포할 수 있는 번역입니다.
+              </p>
+              <p style={{ margin: '0.5rem 0 0' }}>
+                <strong>口語訳聖書 (1955年版ルビ付き)</strong>는 1955년판 일본 구어역 성경의 루비(후리가나)
+                포함 전자본으로, 퍼블릭 도메인으로 공개되어 있습니다. 원 출판사인 일본성서협회(Japan Bible
+                Society)의 저작권 고지를 존중하며 안내용으로 제공합니다.
+              </p>
+              <p style={{ margin: '0.5rem 0 0' }}>
+                데이터는 최초 접속 시 내려받아 기기에 저장되며, 이후에는 오프라인 환경에서도 동일하게
+                사용할 수 있습니다.
               </p>
             </div>
           </div>

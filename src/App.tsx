@@ -1,6 +1,6 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react'
-import type { Selection, SearchResult } from './types/bible'
+import type { Selection, SearchResult, Theme } from './types/bible'
 import { useBibleTranslation } from './hooks/useBibleTranslation'
 import './App.css'
 import { useAppStore } from './store/appStore'
@@ -18,6 +18,11 @@ const SEARCH_LIMIT = 120
 const MIN_FONT_SCALE = 0.85
 const MAX_FONT_SCALE = 1.4
 const FONT_STEP = 0.1
+const THEME_COLORS: Record<Theme, string> = {
+  light: '#f4f5f7',
+  dark: '#0f1118',
+  amoled: '#000000'
+}
 
 const loadSelection = (): Selection | null => {
   try {
@@ -85,6 +90,7 @@ function App() {
   const settingsToggleRef = useRef<HTMLButtonElement | null>(null)
   const searchTimeoutRef = useRef<number | null>(null)
   const wakeLockRef = useRef<WakeLockSentinel | null>(null)
+  const [selectedVerse, setSelectedVerse] = useState<number | null>(null)
 
   const {
     data: koreanData,
@@ -208,6 +214,10 @@ function App() {
     root.dataset.theme = theme
     // Map custom themes to a valid color-scheme keyword for UA default styling
     root.style.colorScheme = theme === 'light' ? 'light' : 'dark'
+    const metaTheme = window.document.querySelector('meta[name="theme-color"]')
+    if (metaTheme) {
+      metaTheme.setAttribute('content', THEME_COLORS[theme])
+    }
   }, [theme])
 
   useEffect(() => {
@@ -402,6 +412,30 @@ function App() {
     }
     return japaneseBook.chapters[chapterIndex] ?? null
   }, [japaneseBook, chapterIndex, showJapanese])
+
+  useEffect(() => {
+    if (!currentChapter) {
+      setSelectedVerse(null)
+      return
+    }
+    const firstVerse = currentChapter.verses[0]?.number ?? null
+    setSelectedVerse((prev) => {
+      if (prev === null) {
+        return firstVerse
+      }
+      const stillExists = currentChapter.verses.some((verse) => verse.number === prev)
+      return stillExists ? prev : firstVerse
+    })
+  }, [currentChapter])
+
+  useEffect(() => {
+    if (!focusTarget || !currentBook || !currentChapter) {
+      return
+    }
+    if (focusTarget.book === currentBook.number && focusTarget.chapter === currentChapter.number) {
+      setSelectedVerse(focusTarget.verse)
+    }
+  }, [focusTarget, currentBook, currentChapter])
 
   const showKoreanColumn = Boolean(showKorean && currentChapter)
   const showEnglishColumn = Boolean(showEnglish && englishChapter)
@@ -619,11 +653,26 @@ function App() {
     const index = Number(event.target.value)
     setBookIndex(index)
     setChapterIndex(0)
+    const nextBook = koreanData?.books[index]
+    const firstVerse = nextBook?.chapters[0]?.verses[0]?.number ?? null
+    setSelectedVerse(firstVerse)
   }
 
   const handleChapterChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const index = Number(event.target.value)
     setChapterIndex(index)
+    const nextChapter = currentBook?.chapters[index]
+    const firstVerse = nextChapter?.verses[0]?.number ?? null
+    setSelectedVerse(firstVerse)
+  }
+
+  const handleVerseChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const verseNumber = Number(event.target.value)
+    if (!currentBook || !currentChapter || Number.isNaN(verseNumber)) {
+      return
+    }
+    setSelectedVerse(verseNumber)
+    setFocusTarget({ book: currentBook.number, chapter: currentChapter.number, verse: verseNumber })
   }
 
   const offlineReady =
@@ -670,7 +719,6 @@ function App() {
             {!isPending && !loadError && japaneseLoadError && showJapanese && (
               <span className="badge warn">일본어 성경 오류</span>
             )}
-            {offlineReady && <span className="badge ok">오프라인 준비 완료</span>}
           </div>
           <button
             type="button"
@@ -718,6 +766,21 @@ function App() {
               {currentBook?.chapters.map((chapter, index) => (
                 <option key={chapter.number} value={index}>
                   {chapter.number}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="select-group">
+            <label htmlFor="verse-select">절</label>
+            <select
+              id="verse-select"
+              value={selectedVerse ?? ''}
+              onChange={handleVerseChange}
+              disabled={!currentChapter || currentChapter.verses.length === 0}
+            >
+              {currentChapter?.verses.map((verse) => (
+                <option key={verse.number} value={verse.number}>
+                  {verse.number}
                 </option>
               ))}
             </select>

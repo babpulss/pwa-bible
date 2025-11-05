@@ -13,7 +13,7 @@ export default defineConfig({
         name: '오프라인 성경',
         short_name: '성경',
         description: '광고 없이 빠르게 성경을 읽고 검색할 수 있는 PWA',
-        theme_color: '#2c5be8',
+        theme_color: '#f4f5f7',
         background_color: '#f4f5f7',
         display: 'standalone',
         lang: 'ko',
