@@ -375,7 +375,8 @@
 }
 
 .verses--dual .verse-row,
-.verses--triple .verse-row {
+.verses--triple .verse-row,
+.verses--quad .verse-row {
   display: grid;
   gap: 0.9rem; /* tighten column gap */
   padding: 0.45rem 0.55rem; /* slightly tighter */
@@ -391,8 +392,13 @@
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.verses--quad .verse-row {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .verses--dual .verse-row:hover,
-.verses--triple .verse-row:hover {
+.verses--triple .verse-row:hover,
+.verses--quad .verse-row:hover {
   background: var(--color-verse-hover);
   box-shadow: inset 0 0 0 1px rgba(44, 91, 232, 0.06);
 }
@@ -801,6 +807,11 @@
   display: flex;
   align-items: center;
 }
+.settings__control--column {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
 .settings__control--info {
   align-items: stretch;
 }
@@ -816,7 +827,54 @@
   border: 1px solid var(--color-border);
   background: var(--color-surface-alt);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  margin-bottom: 2rem;
+  margin-bottom: 0.6rem;
+}
+
+.settings__action-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.settings__action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 180ms ease, background 180ms ease;
+}
+
+.settings__action-button:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  background: var(--color-surface-alt);
+}
+
+.settings__action-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.settings__hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+  line-height: 1.4;
+}
+
+.settings__hint--error {
+  color: var(--color-badge-error-text);
+}
+
+.settings__hint--success {
+  color: var(--color-badge-ok-text);
 }
 
 @media (max-width: 680px) {
@@ -874,14 +932,16 @@
 
   /* 모바일에서는 여러 번역을 위아래로 스택 */
   .verses--dual .verse-row,
-  .verses--triple .verse-row {
+  .verses--triple .verse-row,
+  .verses--quad .verse-row {
     grid-template-columns: 1fr;
     gap: 0.6rem; /* tighter vertical spacing between translations */
   }
 
   /* 스택 시 가독성을 위한 구분선 */
   .verses--dual .verse-row .verse-column--secondary,
-  .verses--triple .verse-row .verse-column--secondary {
+  .verses--triple .verse-row .verse-column--secondary,
+  .verses--quad .verse-row .verse-column--secondary {
     border-top: 1px solid var(--color-divider);
     padding-top: 0.4rem;
     margin-top: 0.2rem;

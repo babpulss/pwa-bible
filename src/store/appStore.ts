@@ -18,7 +18,10 @@ type AppState = {
   showKorean: boolean;
   showEnglish: boolean;
   showJapanese: boolean;
+  showItalian: boolean;
   showFurigana: boolean;
+  japaneseDataAllowed: boolean;
+  italianDataAllowed: boolean;
 
   wakeLockEnabled: boolean;
 
@@ -52,8 +55,12 @@ type AppState = {
   toggleEnglish: () => void;
   setShowJapanese: (v: boolean) => void;
   toggleJapanese: () => void;
+  setShowItalian: (v: boolean) => void;
+  toggleItalian: () => void;
   setShowFurigana: (v: boolean) => void;
   toggleFurigana: () => void;
+  setJapaneseDataAllowed: (v: boolean) => void;
+  setItalianDataAllowed: (v: boolean) => void;
 
   setShowSearch: (v: boolean) => void;
   toggleSearch: () => void;
@@ -91,7 +98,10 @@ export const useAppStore = create<AppState>()(
       showKorean: true,
       showEnglish: true,
       showJapanese: false,
+      showItalian: false,
       showFurigana: true,
+      japaneseDataAllowed: false,
+      italianDataAllowed: false,
       wakeLockEnabled: false,
 
       showSearch: false,
@@ -147,9 +157,14 @@ export const useAppStore = create<AppState>()(
       setShowJapanese: (v: boolean) => set({ showJapanese: v }),
       toggleJapanese: () =>
         set((s: AppState) => ({ showJapanese: !s.showJapanese })),
+      setShowItalian: (v: boolean) => set({ showItalian: v }),
+      toggleItalian: () =>
+        set((s: AppState) => ({ showItalian: !s.showItalian })),
       setShowFurigana: (v: boolean) => set({ showFurigana: v }),
       toggleFurigana: () =>
         set((s: AppState) => ({ showFurigana: !s.showFurigana })),
+      setJapaneseDataAllowed: (v: boolean) => set({ japaneseDataAllowed: v }),
+      setItalianDataAllowed: (v: boolean) => set({ italianDataAllowed: v }),
 
       setShowSearch: (v: boolean) => set({ showSearch: v }),
       toggleSearch: () => set((s: AppState) => ({ showSearch: !s.showSearch })),
@@ -180,7 +195,10 @@ export const useAppStore = create<AppState>()(
         showKorean: state.showKorean,
         showEnglish: state.showEnglish,
         showJapanese: state.showJapanese,
+        showItalian: state.showItalian,
         showFurigana: state.showFurigana,
+        japaneseDataAllowed: state.japaneseDataAllowed,
+        italianDataAllowed: state.italianDataAllowed,
         searchScope: state.searchScope,
         searchBookNumber: state.searchBookNumber,
         wakeLockEnabled: state.wakeLockEnabled,

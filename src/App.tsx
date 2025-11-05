@@ -23,6 +23,8 @@ const THEME_COLORS: Record<Theme, string> = {
   dark: '#0f1118',
   amoled: '#000000'
 }
+const JAPANESE_DATA_SIZE_LABEL = '약 21MB'
+const ITALIAN_DATA_SIZE_LABEL = '약 4.7MB'
 
 const loadSelection = (): Selection | null => {
   try {
@@ -82,8 +84,14 @@ function App() {
   const setShowEnglish = useAppStore((s) => s.setShowEnglish)
   const showJapanese = useAppStore((s) => s.showJapanese)
   const setShowJapanese = useAppStore((s) => s.setShowJapanese)
+  const showItalian = useAppStore((s) => s.showItalian)
+  const setShowItalian = useAppStore((s) => s.setShowItalian)
   const showFurigana = useAppStore((s) => s.showFurigana)
   const setShowFurigana = useAppStore((s) => s.setShowFurigana)
+  const japaneseDataAllowed = useAppStore((s) => s.japaneseDataAllowed)
+  const setJapaneseDataAllowed = useAppStore((s) => s.setJapaneseDataAllowed)
+  const italianDataAllowed = useAppStore((s) => s.italianDataAllowed)
+  const setItalianDataAllowed = useAppStore((s) => s.setItalianDataAllowed)
   const wakeLockEnabled = useAppStore((s) => s.wakeLockEnabled)
   const setWakeLockEnabled = useAppStore((s) => s.setWakeLockEnabled)
   const searchToggleRef = useRef<HTMLButtonElement | null>(null)
@@ -105,13 +113,41 @@ function App() {
   const {
     data: japaneseData,
     isPending: japanesePending,
-    error: japaneseError
-  } = useBibleTranslation('ja')
+    isFetching: japaneseFetching,
+    error: japaneseError,
+    refetch: refetchJapanese
+  } = useBibleTranslation('ja', { enabled: japaneseDataAllowed })
+
+  const {
+    data: italianData,
+    isPending: italianPending,
+    isFetching: italianFetching,
+    error: italianError,
+    refetch: refetchItalian
+  } = useBibleTranslation('ita', { enabled: italianDataAllowed })
+
+  const hasJapaneseData = Boolean(japaneseData)
+  const japaneseDownloadInProgress =
+    japaneseDataAllowed && ((japanesePending && !hasJapaneseData) || (japaneseFetching && !hasJapaneseData))
+  const japaneseDataReady = japaneseDataAllowed && hasJapaneseData
+  const japaneseDownloadError =
+    japaneseDataAllowed && japaneseError
+      ? '일본어 성경 데이터를 내려받는 중 오류가 발생했습니다. 설정에서 다시 시도해 주세요.'
+      : null
+  const hasItalianData = Boolean(italianData)
+  const italianDownloadInProgress =
+    italianDataAllowed && ((italianPending && !hasItalianData) || (italianFetching && !hasItalianData))
+  const italianDataReady = italianDataAllowed && hasItalianData
+  const italianDownloadError =
+    italianDataAllowed && italianError
+      ? '이탈리아어 성경 데이터를 내려받는 중 오류가 발생했습니다. 설정에서 다시 시도해 주세요.'
+      : null
 
   const isPending =
     koreanPending ||
     (showEnglish && englishPending) ||
-    (showJapanese && japanesePending)
+    japaneseDownloadInProgress ||
+    italianDownloadInProgress
   const loadError = koreanError
     ? '성경 데이터를 불러오지 못했습니다. 오프라인 상태인지 확인해주세요.'
     : null
@@ -120,11 +156,8 @@ function App() {
     : englishError
     ? 'KJV 데이터를 불러오지 못했습니다.'
     : null
-  const japaneseLoadError = !showJapanese || koreanError
-    ? null
-    : japaneseError
-    ? '일본어 성경 데이터를 불러오지 못했습니다.'
-    : null
+  const japaneseLoadError = !japaneseDataAllowed || koreanError ? null : japaneseDownloadError
+  const italianLoadError = !italianDataAllowed || koreanError ? null : italianDownloadError
 
   const wakeLockSupported = typeof navigator !== 'undefined' && !!navigator.wakeLock
 
@@ -318,6 +351,18 @@ function App() {
   }, [showJapanese])
 
   useEffect(() => {
+    if (!japaneseDataAllowed && showJapanese) {
+      setShowJapanese(false)
+    }
+  }, [japaneseDataAllowed, showJapanese, setShowJapanese])
+
+  useEffect(() => {
+    if (!italianDataAllowed && showItalian) {
+      setShowItalian(false)
+    }
+  }, [italianDataAllowed, showItalian, setShowItalian])
+
+  useEffect(() => {
     if (typeof window === 'undefined') {
       return
     }
@@ -413,6 +458,20 @@ function App() {
     return japaneseBook.chapters[chapterIndex] ?? null
   }, [japaneseBook, chapterIndex, showJapanese])
 
+  const italianBook = useMemo(() => {
+    if (!showItalian || !italianData) {
+      return null
+    }
+    return italianData.books[bookIndex] ?? null
+  }, [italianData, bookIndex, showItalian])
+
+  const italianChapter = useMemo(() => {
+    if (!showItalian || !italianBook) {
+      return null
+    }
+    return italianBook.chapters[chapterIndex] ?? null
+  }, [italianBook, chapterIndex, showItalian])
+
   useEffect(() => {
     if (!currentChapter) {
       setSelectedVerse(null)
@@ -440,6 +499,7 @@ function App() {
   const showKoreanColumn = Boolean(showKorean && currentChapter)
   const showEnglishColumn = Boolean(showEnglish && englishChapter)
   const showJapaneseColumn = Boolean(showJapanese && japaneseChapter)
+  const showItalianColumn = Boolean(showItalian && italianChapter)
 
   const combinedVerses = useMemo(() => {
     if (!currentChapter) {
@@ -457,18 +517,29 @@ function App() {
         japaneseMap.set(verse.number, verse.text)
       })
     }
+    const italianMap = new Map<number, string>()
+    if (italianChapter) {
+      italianChapter.verses.forEach((verse) => {
+        italianMap.set(verse.number, verse.text)
+      })
+    }
     return currentChapter.verses.map((verse) => ({
       number: verse.number,
       korean: verse.text,
       english: englishMap.get(verse.number) ?? '',
-      japanese: japaneseMap.get(verse.number) ?? ''
+      japanese: japaneseMap.get(verse.number) ?? '',
+      italian: italianMap.get(verse.number) ?? ''
     }))
-  }, [currentChapter, englishChapter, japaneseChapter])
+  }, [currentChapter, englishChapter, japaneseChapter, italianChapter])
 
-  const activeColumns = Number(showKoreanColumn) + Number(showEnglishColumn) + Number(showJapaneseColumn)
+  const activeColumns =
+    Number(showKoreanColumn) + Number(showEnglishColumn) + Number(showJapaneseColumn) + Number(showItalianColumn)
 
   const verseListClass = useMemo(() => {
-    if (activeColumns >= 3) {
+    if (activeColumns >= 4) {
+      return 'verses verses--quad'
+    }
+    if (activeColumns === 3) {
       return 'verses verses--triple'
     }
     if (activeColumns === 2) {
@@ -490,7 +561,27 @@ function App() {
   const toggleKorean = () => setShowKorean(!showKorean)
   const toggleEnglish = () => setShowEnglish(!showEnglish)
   const toggleJapanese = () => setShowJapanese(!showJapanese)
+  const toggleItalian = () => setShowItalian(!showItalian)
   const toggleFurigana = () => setShowFurigana(!showFurigana)
+  const requestJapaneseData = useCallback(() => {
+    if (!japaneseDataAllowed) {
+      setJapaneseDataAllowed(true)
+      return
+    }
+    if (japaneseDownloadError) {
+      void refetchJapanese()
+    }
+  }, [japaneseDataAllowed, japaneseDownloadError, refetchJapanese, setJapaneseDataAllowed])
+
+  const requestItalianData = useCallback(() => {
+    if (!italianDataAllowed) {
+      setItalianDataAllowed(true)
+      return
+    }
+    if (italianDownloadError) {
+      void refetchItalian()
+    }
+  }, [italianDataAllowed, italianDownloadError, refetchItalian, setItalianDataAllowed])
 
   // Chapter navigation helpers
   const canGoPrev = useMemo(() => {
@@ -680,7 +771,8 @@ function App() {
     !loadError &&
     !!koreanData &&
     (!showEnglish || (!englishLoadError && !!englishData)) &&
-    (!showJapanese || (!japaneseLoadError && !!japaneseData))
+    (!japaneseDataAllowed || (!!japaneseData && !japaneseLoadError)) &&
+    (!italianDataAllowed || (!!italianData && !italianLoadError))
 
 
   return (
@@ -708,7 +800,7 @@ function App() {
             <span className="header-button__icon" aria-hidden="true">
               {showSearch ? '✕' : '🔍'}
             </span>
-            <span>{showSearch ? '검색 닫기' : '검색'}</span>
+            <span>검색</span>
           </button>
           <div className="status">
             {isPending && <span className="badge">불러오는 중…</span>}
@@ -716,8 +808,11 @@ function App() {
             {!isPending && !loadError && englishLoadError && showEnglish && (
               <span className="badge warn">KJV 오류</span>
             )}
-            {!isPending && !loadError && japaneseLoadError && showJapanese && (
-              <span className="badge warn">일본어 성경 오류</span>
+            {!isPending && !loadError && japaneseLoadError && japaneseDataAllowed && (
+              <span className="badge warn">일본어 데이터 오류</span>
+            )}
+            {!isPending && !loadError && italianLoadError && italianDataAllowed && (
+              <span className="badge warn">이탈리아어 데이터 오류</span>
             )}
           </div>
           <button
@@ -829,6 +924,7 @@ function App() {
                   {showJapaneseColumn && (
                     <span>{japaneseData?.translation ?? '日本語聖書'}</span>
                   )}
+                  {showItalianColumn && <span>{italianData?.translation ?? 'Italiano 1927'}</span>}
                 </div>
               </header>
               {englishLoadError && showEnglish && (
@@ -871,6 +967,12 @@ function App() {
                           ) : (
                             <span className="verse-text">—</span>
                           )}
+                        </div>
+                      )}
+                      {showItalianColumn && (
+                        <div className="verse-column verse-column--secondary">
+                          <span className="verse-number">{verse.number}</span>
+                          <span className="verse-text">{verse.italian || '—'}</span>
                         </div>
                       )}
                     </li>
@@ -954,8 +1056,20 @@ function App() {
         toggleEnglish={toggleEnglish}
         showJapanese={showJapanese}
         toggleJapanese={toggleJapanese}
+        showItalian={showItalian}
+        toggleItalian={toggleItalian}
         showFurigana={showFurigana}
         toggleFurigana={toggleFurigana}
+        japaneseDataReady={japaneseDataReady}
+        japaneseDownloadInProgress={japaneseDownloadInProgress}
+        japaneseDownloadError={japaneseDownloadError}
+        onDownloadJapanese={requestJapaneseData}
+        japaneseDataSizeLabel={JAPANESE_DATA_SIZE_LABEL}
+        italianDataReady={italianDataReady}
+        italianDownloadInProgress={italianDownloadInProgress}
+        italianDownloadError={italianDownloadError}
+        onDownloadItalian={requestItalianData}
+        italianDataSizeLabel={ITALIAN_DATA_SIZE_LABEL}
         offlineReady={offlineReady}
         isPending={isPending}
         loadError={loadError}
