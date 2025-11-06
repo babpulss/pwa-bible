@@ -537,6 +537,7 @@
   display: flex;
   gap: 0rem; /* tighter number-text gap inside column */
   align-items: flex-start;
+  min-width: 0; /* allow ruby text to shrink inside flexible grid tracks */
 }
 
 .verse-column--secondary {
@@ -577,6 +578,7 @@
 
 .verse-text {
   flex: 1;
+  min-width: 0;
 }
 
 .verse-number {
