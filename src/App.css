@@ -171,8 +171,6 @@
   grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
 }
 
-
-
 .jump-button {
   display: inline-flex;
   align-items: center;
@@ -180,7 +178,7 @@
   padding: 0.55rem 1.2rem;
   border-radius: 999px;
   border: none;
-  background: var(--color-accent);
+  background: var(--jump-button-bg);
   color: #ffffff;
   font-weight: 600;
   font-size: 0.95rem;
@@ -194,7 +192,7 @@
 }
 
 .jump-button:not(:disabled):hover {
-  background: var(--color-accent-strong);
+  background: var(--jump-button-hover-bg);
   transform: translateY(-1px);
 }
 
@@ -210,6 +208,7 @@
   justify-content: flex-start;
   align-items: center;
   gap: 0.5rem;
+  padding-top: 1rem;
 }
 
 .jump-secondary {
@@ -221,8 +220,7 @@
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 160ms ease, background 160ms ease,
-    color 160ms ease;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
 }
 
 .jump-secondary:disabled {
@@ -233,13 +231,6 @@
 .jump-secondary:not(:disabled):hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
-}
-
-.jump-step-header {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.35rem;
 }
 
 .jump-step-title {
@@ -921,8 +912,7 @@
 .modal__body {
   display: grid;
   grid-template-rows: auto auto auto minmax(0, 1fr);
-  gap: 0.8rem;
-  padding: 1rem 1.1rem 1.2rem;
+  padding: 0 1rem 1rem;
   min-height: 300px;
   flex: 1 1 auto;
   overflow-y: auto;

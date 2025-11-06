@@ -9,7 +9,11 @@ type Props = {
   onClose: () => void;
   toggleButtonRef: React.RefObject<HTMLButtonElement | null>;
   books: Book[];
-  onJump: (bookNumber: number, chapterNumber: number, verseNumber: number) => void;
+  onJump: (
+    bookNumber: number,
+    chapterNumber: number,
+    verseNumber: number
+  ) => void;
 };
 
 export function JumpModal(props: Props) {
@@ -101,7 +105,9 @@ export function JumpModal(props: Props) {
                 ref={index + offset === 0 ? firstInteractiveRef : undefined}
               >
                 <span className="jump-card__title">{book.title}</span>
-                <span className="jump-card__meta">{book.chapters.length}장</span>
+                <span className="jump-card__meta">
+                  {book.chapters.length}장
+                </span>
               </button>
             ))}
           </div>
@@ -165,9 +171,26 @@ export function JumpModal(props: Props) {
       toggleButtonRef={toggleButtonRef}
     >
       <div className="modal__header">
-        <h3 className="modal__title" id="jump-dialog-title">
-          바로가기
-        </h3>
+        <div
+          className="modal__title"
+          id="jump-dialog-title"
+          role="heading"
+          aria-level={3}
+        >
+          <p className="jump-step-title">
+            {stepTitle}
+            {step === "chapter" && selectedBook && (
+              <span className="jump-step-hint">
+                총 {selectedBook.chapters.length}장
+              </span>
+            )}
+            {step === "verse" && selectedChapter && (
+              <span className="jump-step-hint">
+                총 {selectedChapter.verses.length}절
+              </span>
+            )}
+          </p>
+        </div>
         <button
           type="button"
           className="modal__close"
@@ -178,24 +201,17 @@ export function JumpModal(props: Props) {
         </button>
       </div>
       <div className="modal__body jump-modal">
-        <div className="jump-actions">
-          {step !== "book" && (
-            <button type="button" className="jump-secondary" onClick={handleBack}>
+        {step !== "book" && (
+          <div className="jump-actions">
+            <button
+              type="button"
+              className="jump-secondary"
+              onClick={handleBack}
+            >
               ← 뒤로가기
             </button>
-          )}
-        </div>
-        <div className="jump-step-header">
-          <p className="jump-step-title">
-            {stepTitle}
-            {step === "chapter" && selectedBook && (
-              <span className="jump-step-hint">총 {selectedBook.chapters.length}장</span>
-            )}
-            {step === "verse" && selectedChapter && (
-              <span className="jump-step-hint">총 {selectedChapter.verses.length}절</span>
-            )}
-          </p>
-        </div>
+          </div>
+        )}
         {renderContent()}
       </div>
     </Modal>

@@ -3,6 +3,23 @@
 
 광고나 부가 기능 없이 성경 본문을 빠르게 읽고 검색할 수 있도록 만든 Vite + React 기반 PWA입니다. 최초 접속 시 `public/data/korean_bible.json`(개역한글)과 `public/data/kjv_bible.json`(KJV)을 내려받아 `service worker`에 캐시하며, 설정에서 일본어와 이탈리아어 번역을 활성화하면 `public/data/japanese_bible.json`(口語訳聖書, 루비 포함)과 `public/data/italian_bible.json`(La Sacra Bibbia Riveduta 1927)도 동일하게 오프라인 캐시에 추가됩니다.
 
+## 미리보기
+
+![앱 스크린샷 - 다크 테마](docs/app-preview-dark.png)
+
+### 작동 영상
+
+<video
+  src="https://raw.githubusercontent.com/babpulss/pwa-bible/main/docs/app-demo.mp4"
+  controls
+  width="720"
+  poster="https://raw.githubusercontent.com/babpulss/pwa-bible/main/docs/app-preview-dark.png"
+  playsinline
+>
+  브라우저가 video 태그를 지원하지 않으면
+  <a href="https://raw.githubusercontent.com/babpulss/pwa-bible/main/docs/app-demo.mp4">여기</a>를 클릭해 보세요.
+</video>
+
 ## 주요 기능
 - 성경/장 선택: 마지막으로 읽은 위치를 자동 저장해 재방문 시 이어서 열기
 - 본문 뷰어: 장별 구절 렌더링, 검색 결과 이동 시 해당 구절 하이라이트

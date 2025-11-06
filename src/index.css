@@ -73,6 +73,8 @@
   --color-badge-ok-text: #246b43;
   --color-badge-error-bg: #fde5e5;
   --color-badge-error-text: #ae2d2d;
+  --jump-button-bg: #4464ed;
+  --jump-button-hover-bg: #3d5adf;
   --shadow-soft: 0 12px 32px rgba(15, 23, 42, 0.05);
   --shadow-strong: 0 18px 40px rgba(15, 23, 42, 0.06);
   --font-ui: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI",
@@ -109,6 +111,8 @@
   --color-badge-ok-text: #96e4ba;
   --color-badge-error-bg: #4a2020;
   --color-badge-error-text: #f1a7a7;
+  --jump-button-bg: #4464ed;
+  --jump-button-hover-bg: #3d5adf;
   --shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.45);
   --shadow-strong: 0 18px 40px rgba(0, 0, 0, 0.55);
   --font-ui: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI",
@@ -145,6 +149,8 @@
   --color-badge-ok-text: #a8edc7;
   --color-badge-error-bg: #3a1414;
   --color-badge-error-text: #ffb5b5;
+  --jump-button-bg: #4464ed;
+  --jump-button-hover-bg: #3d5adf;
   --shadow-soft: 0 12px 32px rgba(0, 0, 0, 0.6);
   --shadow-strong: 0 18px 40px rgba(0, 0, 0, 0.7);
   --font-ui: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI",

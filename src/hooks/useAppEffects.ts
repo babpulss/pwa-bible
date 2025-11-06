@@ -358,8 +358,10 @@ export const useTranslationPreferences = ({
   japaneseDataReady,
   italianDataReady,
 }: TranslationPreferencesParams) => {
-  const japaneseAutoEnabledRef = useRef(false);
-  const italianAutoEnabledRef = useRef(false);
+  const japaneseAllowedPrevRef = useRef(japaneseDataAllowed);
+  const italianAllowedPrevRef = useRef(italianDataAllowed);
+  const japaneseAutoEnablePendingRef = useRef(false);
+  const italianAutoEnablePendingRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -402,22 +404,58 @@ export const useTranslationPreferences = ({
   }, [italianDataAllowed, showItalian, setShowItalian]);
 
   useEffect(() => {
-    if (japaneseDataReady && !japaneseAutoEnabledRef.current) {
-      japaneseAutoEnabledRef.current = true;
-      setShowJapanese(true);
-    } else if (!japaneseDataReady) {
-      japaneseAutoEnabledRef.current = false;
+    const prev = japaneseAllowedPrevRef.current;
+    if (!prev && japaneseDataAllowed) {
+      japaneseAutoEnablePendingRef.current = true;
+    } else if (prev && !japaneseDataAllowed) {
+      japaneseAutoEnablePendingRef.current = false;
     }
-  }, [japaneseDataReady, setShowJapanese]);
+    japaneseAllowedPrevRef.current = japaneseDataAllowed;
+  }, [japaneseDataAllowed]);
 
   useEffect(() => {
-    if (italianDataReady && !italianAutoEnabledRef.current) {
-      italianAutoEnabledRef.current = true;
-      setShowItalian(true);
-    } else if (!italianDataReady) {
-      italianAutoEnabledRef.current = false;
+    const prev = italianAllowedPrevRef.current;
+    if (!prev && italianDataAllowed) {
+      italianAutoEnablePendingRef.current = true;
+    } else if (prev && !italianDataAllowed) {
+      italianAutoEnablePendingRef.current = false;
     }
-  }, [italianDataReady, setShowItalian]);
+    italianAllowedPrevRef.current = italianDataAllowed;
+  }, [italianDataAllowed]);
+
+  useEffect(() => {
+    if (
+      japaneseAutoEnablePendingRef.current &&
+      japaneseDataAllowed &&
+      japaneseDataReady &&
+      !showJapanese
+    ) {
+      japaneseAutoEnablePendingRef.current = false;
+      setShowJapanese(true);
+    }
+  }, [
+    japaneseDataAllowed,
+    japaneseDataReady,
+    setShowJapanese,
+    showJapanese,
+  ]);
+
+  useEffect(() => {
+    if (
+      italianAutoEnablePendingRef.current &&
+      italianDataAllowed &&
+      italianDataReady &&
+      !showItalian
+    ) {
+      italianAutoEnablePendingRef.current = false;
+      setShowItalian(true);
+    }
+  }, [
+    italianDataAllowed,
+    italianDataReady,
+    setShowItalian,
+    showItalian,
+  ]);
 };
 
 export const useModalAccessibility = (
