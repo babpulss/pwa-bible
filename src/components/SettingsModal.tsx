@@ -41,9 +41,6 @@ type Props = {
   italianDownloadInProgress: boolean;
   italianDownloadError: string | null;
   onDownloadItalian: () => void;
-  canInstallPwa: boolean;
-  installingPwa: boolean;
-  onInstallPwa: () => void;
 };
 
 export function SettingsModal(props: Props) {
@@ -79,9 +76,6 @@ export function SettingsModal(props: Props) {
     italianDownloadInProgress,
     italianDownloadError,
     onDownloadItalian,
-    canInstallPwa,
-    installingPwa,
-    onInstallPwa,
   } = props;
 
   const displayPercent =
@@ -390,24 +384,6 @@ export function SettingsModal(props: Props) {
             </div>
           </div>
 
-          {canInstallPwa && (
-            <div className="settings__row">
-              <div className="settings__label">앱 설치</div>
-              <div className="settings__control settings__control--column">
-                <button
-                  type="button"
-                  className="settings__action-button"
-                  onClick={onInstallPwa}
-                  disabled={installingPwa}
-                >
-                  {installingPwa ? "설치 요청 중…" : "PWA 설치하기"}
-                </button>
-                <p className="settings__hint">
-                  PWA앱으로 설치하면 오프라인으로 사용할 수 있습니다.
-                </p>
-              </div>
-            </div>
-          )}
         </div>
         <div className="settings__row settings__row--info" id="license-info">
           <div className="settings__label settings__label--top">정보</div>

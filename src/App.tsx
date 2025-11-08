@@ -749,10 +749,38 @@ function App() {
   return (
     <div className={`app-shell${showSearch ? " app-shell--search-open" : ""}`}>
       <header className="app-header">
-        <div>
+        <div className="header-title">
           <h1>오프라인 성경</h1>
+          {canInstallPwa && (
+            <button
+              type="button"
+              className="jump-button install-button install-button--mobile"
+              onClick={handleInstallPwa}
+              disabled={installingPwa}
+              title="앱으로 설치"
+            >
+              <span className="install-button__icon" aria-hidden="true">
+                ⬇️
+              </span>
+              <span>{installingPwa ? "설치 중…" : "앱 설치"}</span>
+            </button>
+          )}
         </div>
         <div className="header-actions">
+          {canInstallPwa && (
+            <button
+              type="button"
+              className="jump-button install-button install-button--desktop"
+              onClick={handleInstallPwa}
+              disabled={installingPwa}
+              title="앱으로 설치"
+            >
+              <span className="install-button__icon" aria-hidden="true">
+                ⬇️
+              </span>
+              <span>{installingPwa ? "설치 중…" : "앱 설치"}</span>
+            </button>
+          )}
           <button
             type="button"
             className="jump-button"
@@ -1047,9 +1075,6 @@ function App() {
         italianDownloadInProgress={italianDownloadInProgress}
         italianDownloadError={italianDownloadError}
         onDownloadItalian={requestItalianData}
-        canInstallPwa={canInstallPwa}
-        installingPwa={installingPwa}
-        onInstallPwa={handleInstallPwa}
       />
 
       <footer className="app-footer">

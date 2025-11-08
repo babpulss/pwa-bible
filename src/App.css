@@ -197,6 +197,39 @@
   transform: translateY(-1px);
 }
 
+.install-button {
+  background: var(--color-accent);
+  box-shadow: 0 12px 24px rgba(45, 70, 255, 0.25);
+}
+
+.install-button__icon {
+  font-size: 1.2rem;
+}
+
+.install-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.install-button:not(:disabled):hover {
+  box-shadow: 0 16px 32px rgba(45, 70, 255, 0.35);
+}
+
+.install-button--mobile {
+  display: none;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.install-button--desktop {
+  display: inline-flex;
+}
+
 .jump-modal {
   display: flex;
   flex-direction: column;
@@ -983,6 +1016,12 @@
   gap: 1rem;
 }
 
+.settings__row--info {
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--color-divider);
+}
+
 .settings__label {
   font-size: 0.9rem;
   font-weight: 700;
@@ -1115,9 +1154,23 @@
     gap: 1.2rem;
   }
 
+  .header-title {
+    width: 100%;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
   .header-actions {
     width: 100%;
     justify-content: space-between;
+  }
+
+  .install-button--mobile {
+    display: inline-flex;
+  }
+
+  .install-button--desktop {
+    display: none;
   }
 
   /* 모바일에서는 여러 번역을 위아래로 스택 */
