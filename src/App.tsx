@@ -1,5 +1,5 @@
 import type { FormEvent } from "react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import { SearchModal } from "./components/SearchModal";
 import { SettingsModal } from "./components/SettingsModal";
@@ -30,6 +30,15 @@ import type {
   Selection,
   TranslationId,
 } from "./types/bible";
+
+type BeforeInstallPromptEvent = Event & {
+  prompt: () => void;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+};
+
+type NavigatorWithStandalone = Navigator & {
+  standalone?: boolean;
+};
 
 const loadSelection = (): Selection | null => {
   try {
@@ -77,6 +86,9 @@ function App() {
   const showSettings = useAppStore((s) => s.showSettings);
   const setShowSettings = useAppStore((s) => s.setShowSettings);
   const [showJump, setShowJump] = useState(false);
+  const [showScrollTopFab, setShowScrollTopFab] = useState(false);
+  const [canInstallPwa, setCanInstallPwa] = useState(false);
+  const [installingPwa, setInstallingPwa] = useState(false);
   const toggleSettings = useAppStore((s) => s.toggleSettings);
   const manualTheme = useAppStore((s) => s.manualTheme);
   const setManualTheme = useAppStore((s) => s.setManualTheme);
@@ -105,6 +117,7 @@ function App() {
   const jumpToggleRef = useRef<HTMLButtonElement | null>(null);
   const searchTimeoutRef = useRef<number | null>(null);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  const installPromptRef = useRef<BeforeInstallPromptEvent | null>(null);
   const [selectedVerse, setSelectedVerse] = useState<number | null>(null);
 
   const {
@@ -498,6 +511,75 @@ function App() {
     }
   };
 
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const threshold = 320;
+    const handleScroll = () => {
+      setShowScrollTopFab(window.scrollY > threshold);
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const getStandalone = () => {
+      return (
+        window.matchMedia("(display-mode: standalone)").matches ||
+        ((window.navigator as NavigatorWithStandalone).standalone ?? false)
+      );
+    };
+
+    if (getStandalone()) {
+      setCanInstallPwa(false);
+    }
+
+    const handleBeforeInstallPrompt = (event: Event) => {
+      event.preventDefault();
+      installPromptRef.current = event as BeforeInstallPromptEvent;
+      if (!getStandalone()) {
+        setCanInstallPwa(true);
+      }
+    };
+
+    const handleAppInstalled = () => {
+      installPromptRef.current = null;
+      setCanInstallPwa(false);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallPwa = useCallback(async () => {
+    const promptEvent = installPromptRef.current;
+    if (!promptEvent) {
+      setCanInstallPwa(false);
+      return;
+    }
+    setInstallingPwa(true);
+    try {
+      promptEvent.prompt();
+      await promptEvent.userChoice;
+    } finally {
+      setInstallingPwa(false);
+      installPromptRef.current = null;
+      setCanInstallPwa(false);
+    }
+  }, []);
+
   const goPrevChapter = () => {
     if (!koreanData || !currentBook) return;
     if (chapterIndex > 0) {
@@ -663,14 +745,6 @@ function App() {
     });
     setShowSearch(false);
   };
-
-  const offlineReady =
-    !isPending &&
-    !loadError &&
-    !!koreanData &&
-    (!showEnglish || (!englishLoadError && !!englishData)) &&
-    (!japaneseDataAllowed || (!!japaneseData && !japaneseLoadError)) &&
-    (!italianDataAllowed || (!!italianData && !italianLoadError));
 
   return (
     <div className={`app-shell${showSearch ? " app-shell--search-open" : ""}`}>
@@ -973,11 +1047,9 @@ function App() {
         italianDownloadInProgress={italianDownloadInProgress}
         italianDownloadError={italianDownloadError}
         onDownloadItalian={requestItalianData}
-        offlineReady={offlineReady}
-        isPending={isPending}
-        loadError={loadError}
-        englishLoadError={englishLoadError}
-        japaneseLoadError={japaneseLoadError}
+        canInstallPwa={canInstallPwa}
+        installingPwa={installingPwa}
+        onInstallPwa={handleInstallPwa}
       />
 
       <footer className="app-footer">
@@ -998,6 +1070,15 @@ function App() {
           저작권/오프라인 안내 보기
         </button>
       </footer>
+      <button
+        type="button"
+        className={`scroll-top-fab${showScrollTopFab ? " scroll-top-fab--visible" : ""}`}
+        onClick={scrollChapterToTop}
+        aria-label="맨 위로 이동"
+        title="맨 위로"
+      >
+        ↑
+      </button>
     </div>
   );
 }

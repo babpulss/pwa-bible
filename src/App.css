@@ -257,7 +257,8 @@
 
 .jump-grid--chapters,
 .jump-grid--verses {
-  grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  justify-items: center;
 }
 
 .jump-book-wrapper {
@@ -317,6 +318,7 @@
 
 .jump-card--compact {
   padding: 0.6rem 0.7rem;
+  width: 84px;
 }
 
 .jump-card:hover {
@@ -541,11 +543,11 @@
 }
 
 .verse-column--secondary {
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 
 .verse-column--ruby {
-  color: var(--color-text-secondary);
+  color: var(--color-text-primary);
 }
 
 .verse-text--ruby {
@@ -724,6 +726,45 @@
 .app-footer p {
   margin: 0;
   line-height: 1.5;
+}
+
+.scroll-top-fab {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 2rem;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  border: none;
+  background: var(--color-accent);
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 30px rgba(24, 34, 78, 0.32);
+  cursor: pointer;
+  transition: opacity 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+  opacity: 0;
+  transform: translateY(12px) scale(0.9);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.scroll-top-fab--visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.scroll-top-fab:hover {
+  box-shadow: 0 18px 38px rgba(24, 34, 78, 0.4);
+}
+
+.scroll-top-fab:focus-visible {
+  outline: 3px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 3px;
 }
 
 /* Chapter bottom navigation */

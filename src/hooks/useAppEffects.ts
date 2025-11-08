@@ -1,4 +1,4 @@
-import type { Dispatch, MutableRefObject, SetStateAction } from "react";
+import type { Dispatch, RefObject, SetStateAction } from "react";
 import { useEffect, useRef } from "react";
 import {
   FONT_SCALE_KEY,
@@ -214,7 +214,9 @@ export const useFocusEffects = ({
     const frame = window.requestAnimationFrame(() => {
       const element = document.getElementById(id);
       if (element) {
-        element.scrollIntoView({ behavior: "smooth", block: "center" });
+        const rect = element.getBoundingClientRect();
+        const targetTop = Math.max(window.scrollY + rect.top, 0);
+        window.scrollTo({ top: targetTop, behavior: "smooth" });
         element.classList.add("verse-highlight");
         timeoutId = window.setTimeout(() => {
           element.classList.remove("verse-highlight");
@@ -278,7 +280,7 @@ export const useSelectedVerseEffects = ({
 
 export const useWakeLockEffect = (
   wakeLockEnabled: boolean,
-  wakeLockRef: MutableRefObject<WakeLockSentinel | null>
+  wakeLockRef: RefObject<WakeLockSentinel | null>
 ) => {
   useEffect(() => {
     let cancelled = false;
@@ -481,7 +483,7 @@ export const useModalAccessibility = (
 };
 
 export const useSearchTimeoutCleanup = (
-  ref: MutableRefObject<number | null>
+  ref: RefObject<number | null>
 ) => {
   useEffect(
     () => () => {
