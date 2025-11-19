@@ -1,7 +1,10 @@
 import { Modal } from "./Modal";
-import { useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import type { FormEvent, ReactNode } from "react";
 import type { Book, SearchResult } from "../types/bible";
 import { SEARCH_LIMIT } from "../config/appConstants";
+
+const SEARCH_RESULT_HIGHLIGHT_NAME = "search-results-highlight";
 
 type Props = {
   open: boolean;
@@ -17,15 +20,98 @@ type Props = {
   books: Book[];
   searching: boolean;
   searchResults: SearchResult[];
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: (e: FormEvent<HTMLFormElement>) => void;
   onClickResult: (r: SearchResult) => void;
   toggleButtonRef: React.RefObject<HTMLButtonElement | null>;
   searchReady: boolean;
   lastSearchedQuery: string;
 };
 
+const highlightResultText = (text: string, query: string): ReactNode => {
+  const trimmedQuery = query.trim();
+  if (!trimmedQuery) {
+    return text;
+  }
+  const escapedQuery = escapeRegExp(trimmedQuery);
+  if (!escapedQuery) {
+    return text;
+  }
+  const regex = new RegExp(escapedQuery, "gi");
+  const highlighted: ReactNode[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  // eslint-disable-next-line no-cond-assign
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      highlighted.push(text.slice(lastIndex, match.index));
+    }
+    const matchedText = match[0];
+    highlighted.push(
+      <mark
+        key={`highlight-${match.index}-${highlighted.length}`}
+        className="search-highlight"
+      >
+        {matchedText}
+      </mark>
+    );
+    lastIndex = match.index + matchedText.length;
+  }
+  if (lastIndex < text.length) {
+    highlighted.push(text.slice(lastIndex));
+  }
+  return highlighted.length ? highlighted : text;
+};
+
+const escapeRegExp = (value: string): string =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+const addCustomHighlightRanges = (
+  element: HTMLElement,
+  normalizedQuery: string,
+  rawQueryLength: number,
+  highlight: Highlight
+) => {
+  const walker = document.createTreeWalker(
+    element,
+    NodeFilter.SHOW_TEXT,
+    null
+  );
+  let currentNode = walker.nextNode();
+  while (currentNode) {
+    const textNode = currentNode as Text;
+    applyRangesForTextNode(textNode, normalizedQuery, rawQueryLength, highlight);
+    currentNode = walker.nextNode();
+  }
+};
+
+const applyRangesForTextNode = (
+  textNode: Text,
+  normalizedQuery: string,
+  rawQueryLength: number,
+  highlight: Highlight
+) => {
+  const nodeValue = textNode.nodeValue;
+  if (!nodeValue) {
+    return;
+  }
+  const normalizedValue = nodeValue.toLocaleLowerCase();
+  let searchStart = 0;
+  while (searchStart <= normalizedValue.length) {
+    const matchIndex = normalizedValue.indexOf(normalizedQuery, searchStart);
+    if (matchIndex === -1) {
+      break;
+    }
+    const range = new Range();
+    range.setStart(textNode, matchIndex);
+    range.setEnd(textNode, matchIndex + rawQueryLength);
+    highlight.add(range);
+    searchStart = matchIndex + rawQueryLength;
+  }
+};
+
 export function SearchModal(props: Props) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const resultsContentRef = useRef<HTMLDivElement | null>(null);
   const {
     open,
     onClose,
@@ -44,6 +130,57 @@ export function SearchModal(props: Props) {
     searchReady,
     lastSearchedQuery,
   } = props;
+
+  const supportsCustomHighlight = useMemo(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+    const css = window.CSS;
+    return Boolean(css?.highlights && "Highlight" in window);
+  }, []);
+
+  useEffect(() => {
+    if (!supportsCustomHighlight) {
+      return;
+    }
+    const css = window.CSS;
+    const registry = css?.highlights;
+    const highlightConstructor = window.Highlight;
+    if (!registry || !highlightConstructor) {
+      return;
+    }
+    const cleanup = () => {
+      registry.delete(SEARCH_RESULT_HIGHLIGHT_NAME);
+    };
+    registry.delete(SEARCH_RESULT_HIGHLIGHT_NAME);
+    if (!open) {
+      return cleanup;
+    }
+    const trimmedQuery = lastSearchedQuery.trim();
+    if (!trimmedQuery) {
+      return cleanup;
+    }
+    const container = resultsContentRef.current;
+    if (!container) {
+      return cleanup;
+    }
+    const normalizedQuery = trimmedQuery.toLocaleLowerCase();
+    const highlight = new highlightConstructor();
+    const targets = container.querySelectorAll<HTMLElement>(".result-text");
+    targets.forEach((element) => {
+      addCustomHighlightRanges(
+        element,
+        normalizedQuery,
+        trimmedQuery.length,
+        highlight
+      );
+    });
+    if (highlight.size > 0) {
+      registry.set(SEARCH_RESULT_HIGHLIGHT_NAME, highlight);
+    }
+    return cleanup;
+  }, [supportsCustomHighlight, lastSearchedQuery, searchResults, open]);
+
   return (
     <Modal
       open={open}
@@ -143,7 +280,7 @@ export function SearchModal(props: Props) {
             </select>
           </fieldset>
         </form>
-        <div className="modal__content">
+        <div className="modal__content" ref={resultsContentRef}>
           <div className="search-results__header">
             <h3>검색 결과</h3>
             {searching && <span className="badge">검색 중…</span>}
@@ -172,7 +309,11 @@ export function SearchModal(props: Props) {
                       {result.translation}
                     </span>
                   </span>
-                  <span className="result-text">{result.text}</span>
+                  <span className="result-text">
+                    {supportsCustomHighlight
+                      ? result.text
+                      : highlightResultText(result.text ?? "", lastSearchedQuery)}
+                  </span>
                 </button>
               </li>
             ))}

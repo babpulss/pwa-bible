@@ -739,6 +739,20 @@
   font-family: var(--font-reading);
 }
 
+.search-highlight {
+  background: var(--color-search-highlight);
+  color: var(--color-search-highlight-text);
+  padding: 0 0.15em;
+  border-radius: 0.2em;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+::highlight(search-results-highlight) {
+  background-color: var(--color-search-highlight);
+  color: var(--color-search-highlight-text);
+}
+
 .hint {
   font-size: 0.8rem;
   color: var(--color-muted);

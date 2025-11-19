@@ -64,6 +64,8 @@
   --color-accent-strong: #2449bb;
   --color-verse-hover: #f0f4ff;
   --color-highlight: #fbe6a2;
+  --color-search-highlight: #fff96f;
+  --color-search-highlight-text: #1c1c1e;
   --color-result-bg: #f6f7fb;
   --color-result-hover: #edf1ff;
   --color-result-border: #b7c7ff;
@@ -102,6 +104,8 @@
   --color-accent-strong: #517ad6;
   --color-verse-hover: #28324a;
   --color-highlight: #38445c;
+  --color-search-highlight: #ffcc5c;
+  --color-search-highlight-text: #1c1c1e;
   --color-result-bg: #202635;
   --color-result-hover: #273047;
   --color-result-border: #425377;
@@ -140,6 +144,8 @@
   --color-accent-strong: #4e76d1;
   --color-verse-hover: #0e1422; /* subtle blue-tinted hover while staying dark */
   --color-highlight: #1a1a1a; /* dark highlight background suitable for black */
+  --color-search-highlight: #ffb347;
+  --color-search-highlight-text: #0b0b0b;
   --color-result-bg: #0b0b0b;
   --color-result-hover: #121212;
   --color-result-border: #374053;
