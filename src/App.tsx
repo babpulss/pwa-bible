@@ -644,6 +644,7 @@ function App() {
         return;
       }
       setSearching(true);
+      const normalizedTerm = term.toLocaleLowerCase();
       const timeoutId = window.setTimeout(() => {
         const results: SearchResult[] = [];
         let reachedLimit = false;
@@ -656,7 +657,8 @@ function App() {
             if (searchScope === "nt" && book.number <= 39) continue;
             for (const chapter of book.chapters) {
               for (const verse of chapter.verses) {
-                if (verse.text.includes(term)) {
+                const verseText = verse.text ?? "";
+                if (verseText.toLocaleLowerCase().includes(normalizedTerm)) {
                   const koreanBookTitle = koreanData?.books.find(
                     (b) => b.number === book.number
                   )?.title;
