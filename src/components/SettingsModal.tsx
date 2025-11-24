@@ -27,6 +27,8 @@ type Props = {
   toggleKorean: () => void;
   showEnglish: boolean;
   toggleEnglish: () => void;
+  showRussian: boolean;
+  toggleRussian: () => void;
   showJapanese: boolean;
   toggleJapanese: () => void;
   showItalian: boolean;
@@ -59,12 +61,14 @@ export function SettingsModal(props: Props) {
     setWakeLockEnabled,
     wakeLockSupported,
     showKorean,
-    toggleKorean,
-    showEnglish,
-    toggleEnglish,
-    showJapanese,
-    toggleJapanese,
-    showItalian,
+  toggleKorean,
+  showEnglish,
+  toggleEnglish,
+  showRussian,
+  toggleRussian,
+  showJapanese,
+  toggleJapanese,
+  showItalian,
     toggleItalian,
     showFurigana,
     toggleFurigana,
@@ -280,6 +284,23 @@ export function SettingsModal(props: Props) {
           </div>
 
           <div className="settings__row">
+            <div className="settings__label">러시아어 보기</div>
+            <div className="settings__control">
+              <label className="toggle" aria-label="러시아어 성경 번역 표시">
+                <span className="toggle__switch">
+                  <input
+                    type="checkbox"
+                    checked={showRussian}
+                    onChange={toggleRussian}
+                  />
+                  <span className="toggle__indicator" />
+                </span>
+                <span className="toggle__label">표시</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="settings__row">
             <div className="settings__label">일본어 보기</div>
             <div className="settings__control settings__control--column">
               <div
@@ -397,6 +418,10 @@ export function SettingsModal(props: Props) {
               <p style={{ margin: "0.5rem 0 0" }}>
                 <strong>King James Version</strong>은 퍼블릭 도메인으로 누구나
                 자유롭게 이용하고 재배포할 수 있는 번역입니다.
+              </p>
+              <p style={{ margin: "0.5rem 0 0" }}>
+                <strong>Синодальный перевод (RUSV)</strong>은 퍼블릭 도메인으로 누구나
+                자유롭게 이용하고 재배포할 수 있는 번역입니다. 
               </p>
               <p style={{ margin: "0.5rem 0 0" }}>
                 <strong>口語訳聖書 (1955年版ルビ付き)</strong>는 1955년판 일본

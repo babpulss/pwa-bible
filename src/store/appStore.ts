@@ -20,6 +20,7 @@ type AppState = {
   showKorean: boolean;
   showEnglish: boolean;
   showJapanese: boolean;
+  showRussian: boolean;
   showItalian: boolean;
   showFurigana: boolean;
   japaneseDataAllowed: boolean;
@@ -57,6 +58,8 @@ type AppState = {
   toggleEnglish: () => void;
   setShowJapanese: (v: boolean) => void;
   toggleJapanese: () => void;
+  setShowRussian: (v: boolean) => void;
+  toggleRussian: () => void;
   setShowItalian: (v: boolean) => void;
   toggleItalian: () => void;
   setShowFurigana: (v: boolean) => void;
@@ -100,6 +103,7 @@ export const useAppStore = create<AppState>()(
       showKorean: true,
       showEnglish: true,
       showJapanese: false,
+      showRussian: false,
       showItalian: false,
       showFurigana: true,
       japaneseDataAllowed: false,
@@ -158,6 +162,9 @@ export const useAppStore = create<AppState>()(
       setShowJapanese: (v: boolean) => set({ showJapanese: v }),
       toggleJapanese: () =>
         set((s: AppState) => ({ showJapanese: !s.showJapanese })),
+      setShowRussian: (v: boolean) => set({ showRussian: v }),
+      toggleRussian: () =>
+        set((s: AppState) => ({ showRussian: !s.showRussian })),
       setShowItalian: (v: boolean) => set({ showItalian: v }),
       toggleItalian: () =>
         set((s: AppState) => ({ showItalian: !s.showItalian })),
@@ -196,6 +203,7 @@ export const useAppStore = create<AppState>()(
         showKorean: state.showKorean,
         showEnglish: state.showEnglish,
         showJapanese: state.showJapanese,
+        showRussian: state.showRussian,
         showItalian: state.showItalian,
         showFurigana: state.showFurigana,
         japaneseDataAllowed: state.japaneseDataAllowed,

@@ -6,6 +6,7 @@ import {
   SHOW_FURIGANA_KEY,
   SHOW_JAPANESE_KEY,
   SHOW_KOREAN_KEY,
+  SHOW_RUSSIAN_KEY,
   STORAGE_KEY,
   THEME_COLORS,
   THEME_KEY,
@@ -53,9 +54,11 @@ type TranslationPreferencesParams = {
   showKorean: boolean;
   showEnglish: boolean;
   showJapanese: boolean;
+  showRussian: boolean;
   showItalian: boolean;
   showFurigana: boolean;
   setShowJapanese: (value: boolean) => void;
+  setShowRussian: (value: boolean) => void;
   setShowItalian: (value: boolean) => void;
   japaneseDataAllowed: boolean;
   italianDataAllowed: boolean;
@@ -351,9 +354,11 @@ export const useTranslationPreferences = ({
   showKorean,
   showEnglish,
   showJapanese,
+  showRussian,
   showItalian,
   showFurigana,
   setShowJapanese,
+  setShowRussian,
   setShowItalian,
   japaneseDataAllowed,
   italianDataAllowed,
@@ -385,6 +390,13 @@ export const useTranslationPreferences = ({
     }
     window.localStorage.setItem(SHOW_JAPANESE_KEY, String(showJapanese));
   }, [showJapanese]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    window.localStorage.setItem(SHOW_RUSSIAN_KEY, String(showRussian));
+  }, [showRussian]);
 
   useEffect(() => {
     if (typeof window === "undefined") {

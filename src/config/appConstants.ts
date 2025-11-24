@@ -5,6 +5,7 @@ export const SHOW_KOREAN_KEY = "simple-bible:show-korean";
 export const SHOW_ENGLISH_KEY = "simple-bible:show-english";
 export const SHOW_JAPANESE_KEY = "simple-bible:show-japanese";
 export const SHOW_FURIGANA_KEY = "simple-bible:show-furigana";
+export const SHOW_RUSSIAN_KEY = "simple-bible:show-russian";
 
 export const SEARCH_LIMIT = 120;
 
