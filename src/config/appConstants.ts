@@ -21,4 +21,5 @@ export const THEME_COLORS = {
 } as const;
 
 export const JAPANESE_DATA_SIZE_LABEL = "약 21MB";
+export const RUSSIAN_DATA_SIZE_LABEL = "약 7.1MB";
 export const ITALIAN_DATA_SIZE_LABEL = "약 4.7MB";

@@ -46,7 +46,11 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,woff2}'],
         cleanupOutdatedCaches: true,
-        globIgnores: ['**/japanese_bible.json', '**/italian_bible.json'],
+        globIgnores: [
+          '**/japanese_bible.json',
+          '**/russian_bible.json',
+          '**/italian_bible.json'
+        ],
         maximumFileSizeToCacheInBytes: 30 * 1024 * 1024
       },
       devOptions: {

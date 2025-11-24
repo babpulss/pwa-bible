@@ -5,6 +5,7 @@ import {
   FONT_STEP,
   ITALIAN_DATA_SIZE_LABEL,
   JAPANESE_DATA_SIZE_LABEL,
+  RUSSIAN_DATA_SIZE_LABEL,
   MAX_FONT_SCALE,
   MIN_FONT_SCALE,
 } from "../config/appConstants";
@@ -35,6 +36,10 @@ type Props = {
   toggleItalian: () => void;
   showFurigana: boolean;
   toggleFurigana: () => void;
+  russianDataReady: boolean;
+  russianDownloadInProgress: boolean;
+  russianDownloadError: string | null;
+  onDownloadRussian: () => void;
   japaneseDataReady: boolean;
   japaneseDownloadInProgress: boolean;
   japaneseDownloadError: string | null;
@@ -61,17 +66,21 @@ export function SettingsModal(props: Props) {
     setWakeLockEnabled,
     wakeLockSupported,
     showKorean,
-  toggleKorean,
-  showEnglish,
-  toggleEnglish,
-  showRussian,
-  toggleRussian,
-  showJapanese,
-  toggleJapanese,
-  showItalian,
+    toggleKorean,
+    showEnglish,
+    toggleEnglish,
+    showRussian,
+    toggleRussian,
+    showJapanese,
+    toggleJapanese,
+    showItalian,
     toggleItalian,
     showFurigana,
     toggleFurigana,
+    russianDataReady,
+    russianDownloadInProgress,
+    russianDownloadError,
+    onDownloadRussian,
     japaneseDataReady,
     japaneseDownloadInProgress,
     japaneseDownloadError,
@@ -285,18 +294,46 @@ export function SettingsModal(props: Props) {
 
           <div className="settings__row">
             <div className="settings__label">러시아어 보기</div>
-            <div className="settings__control">
-              <label className="toggle" aria-label="러시아어 성경 번역 표시">
-                <span className="toggle__switch">
-                  <input
-                    type="checkbox"
-                    checked={showRussian}
-                    onChange={toggleRussian}
-                  />
-                  <span className="toggle__indicator" />
-                </span>
-                <span className="toggle__label">표시</span>
-              </label>
+            <div className="settings__control settings__control--column">
+              <div
+                style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}
+              >
+                <label className="toggle" aria-label="러시아어 성경 번역 표시">
+                  <span className="toggle__switch">
+                    <input
+                      type="checkbox"
+                      checked={showRussian}
+                      onChange={toggleRussian}
+                      disabled={!russianDataReady}
+                    />
+                    <span className="toggle__indicator" />
+                  </span>
+                  <span className="toggle__label">표시</span>
+                </label>
+              </div>
+              {!russianDataReady && (
+                <>
+                  <div className="settings__action-row">
+                    <p className="settings__hint">
+                      러시아어 성경 데이터({RUSSIAN_DATA_SIZE_LABEL})는 직접
+                      다운로드 후 사용할 수 있습니다.
+                    </p>
+                    <button
+                      type="button"
+                      className="settings__action-button"
+                      onClick={onDownloadRussian}
+                      disabled={russianDownloadInProgress}
+                    >
+                      {russianDownloadInProgress ? "다운로드 중…" : "다운로드"}
+                    </button>
+                  </div>
+                  {russianDownloadError && (
+                    <p className="settings__hint settings__hint--error">
+                      {russianDownloadError}
+                    </p>
+                  )}
+                </>
+              )}
             </div>
           </div>
 

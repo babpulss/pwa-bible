@@ -61,8 +61,10 @@ type TranslationPreferencesParams = {
   setShowRussian: (value: boolean) => void;
   setShowItalian: (value: boolean) => void;
   japaneseDataAllowed: boolean;
+  russianDataAllowed: boolean;
   italianDataAllowed: boolean;
   japaneseDataReady: boolean;
+  russianDataReady: boolean;
   italianDataReady: boolean;
 };
 
@@ -363,11 +365,15 @@ export const useTranslationPreferences = ({
   japaneseDataAllowed,
   italianDataAllowed,
   japaneseDataReady,
+  russianDataAllowed,
+  russianDataReady,
   italianDataReady,
 }: TranslationPreferencesParams) => {
   const japaneseAllowedPrevRef = useRef(japaneseDataAllowed);
+  const russianAllowedPrevRef = useRef(russianDataAllowed);
   const italianAllowedPrevRef = useRef(italianDataAllowed);
   const japaneseAutoEnablePendingRef = useRef(false);
+  const russianAutoEnablePendingRef = useRef(false);
   const italianAutoEnablePendingRef = useRef(false);
 
   useEffect(() => {
@@ -412,6 +418,12 @@ export const useTranslationPreferences = ({
   }, [japaneseDataAllowed, showJapanese, setShowJapanese]);
 
   useEffect(() => {
+    if (!russianDataAllowed && showRussian) {
+      setShowRussian(false);
+    }
+  }, [russianDataAllowed, showRussian, setShowRussian]);
+
+  useEffect(() => {
     if (!italianDataAllowed && showItalian) {
       setShowItalian(false);
     }
@@ -426,6 +438,16 @@ export const useTranslationPreferences = ({
     }
     japaneseAllowedPrevRef.current = japaneseDataAllowed;
   }, [japaneseDataAllowed]);
+
+  useEffect(() => {
+    const prev = russianAllowedPrevRef.current;
+    if (!prev && russianDataAllowed) {
+      russianAutoEnablePendingRef.current = true;
+    } else if (prev && !russianDataAllowed) {
+      russianAutoEnablePendingRef.current = false;
+    }
+    russianAllowedPrevRef.current = russianDataAllowed;
+  }, [russianDataAllowed]);
 
   useEffect(() => {
     const prev = italianAllowedPrevRef.current;
@@ -453,6 +475,18 @@ export const useTranslationPreferences = ({
     setShowJapanese,
     showJapanese,
   ]);
+
+  useEffect(() => {
+    if (
+      russianAutoEnablePendingRef.current &&
+      russianDataAllowed &&
+      russianDataReady &&
+      !showRussian
+    ) {
+      russianAutoEnablePendingRef.current = false;
+      setShowRussian(true);
+    }
+  }, [russianDataAllowed, russianDataReady, setShowRussian, showRussian]);
 
   useEffect(() => {
     if (

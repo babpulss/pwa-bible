@@ -24,6 +24,7 @@ type AppState = {
   showItalian: boolean;
   showFurigana: boolean;
   japaneseDataAllowed: boolean;
+  russianDataAllowed: boolean;
   italianDataAllowed: boolean;
 
   wakeLockEnabled: boolean;
@@ -65,6 +66,7 @@ type AppState = {
   setShowFurigana: (v: boolean) => void;
   toggleFurigana: () => void;
   setJapaneseDataAllowed: (v: boolean) => void;
+  setRussianDataAllowed: (v: boolean) => void;
   setItalianDataAllowed: (v: boolean) => void;
 
   setShowSearch: (v: boolean) => void;
@@ -107,6 +109,7 @@ export const useAppStore = create<AppState>()(
       showItalian: false,
       showFurigana: true,
       japaneseDataAllowed: false,
+      russianDataAllowed: false,
       italianDataAllowed: false,
       wakeLockEnabled: false,
 
@@ -172,6 +175,7 @@ export const useAppStore = create<AppState>()(
       toggleFurigana: () =>
         set((s: AppState) => ({ showFurigana: !s.showFurigana })),
       setJapaneseDataAllowed: (v: boolean) => set({ japaneseDataAllowed: v }),
+      setRussianDataAllowed: (v: boolean) => set({ russianDataAllowed: v }),
       setItalianDataAllowed: (v: boolean) => set({ italianDataAllowed: v }),
 
       setShowSearch: (v: boolean) => set({ showSearch: v }),
@@ -207,6 +211,7 @@ export const useAppStore = create<AppState>()(
         showItalian: state.showItalian,
         showFurigana: state.showFurigana,
         japaneseDataAllowed: state.japaneseDataAllowed,
+        russianDataAllowed: state.russianDataAllowed,
         italianDataAllowed: state.italianDataAllowed,
         searchScope: state.searchScope,
         searchBookNumber: state.searchBookNumber,

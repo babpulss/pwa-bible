@@ -110,6 +110,8 @@ function App() {
   const setShowFurigana = useAppStore((s) => s.setShowFurigana);
   const japaneseDataAllowed = useAppStore((s) => s.japaneseDataAllowed);
   const setJapaneseDataAllowed = useAppStore((s) => s.setJapaneseDataAllowed);
+  const russianDataAllowed = useAppStore((s) => s.russianDataAllowed);
+  const setRussianDataAllowed = useAppStore((s) => s.setRussianDataAllowed);
   const italianDataAllowed = useAppStore((s) => s.italianDataAllowed);
   const setItalianDataAllowed = useAppStore((s) => s.setItalianDataAllowed);
   const wakeLockEnabled = useAppStore((s) => s.wakeLockEnabled);
@@ -150,8 +152,21 @@ function App() {
   const {
     data: russianData,
     isPending: russianPending,
+    isFetching: russianFetching,
     error: russianError,
-  } = useBibleTranslation("rus", { enabled: showRussian });
+    refetch: refetchRussian,
+  } = useBibleTranslation("rus", { enabled: russianDataAllowed });
+
+  const hasRussianData = Boolean(russianData);
+  const russianDownloadInProgress =
+    russianDataAllowed &&
+    ((russianPending && !hasRussianData) ||
+      (russianFetching && !hasRussianData));
+  const russianDataReady = russianDataAllowed && hasRussianData;
+  const russianDownloadError =
+    russianDataAllowed && russianError
+      ? "러시아어 성경 데이터를 내려받는 중 오류가 발생했습니다. 설정에서 다시 시도해 주세요."
+      : null;
 
   const hasJapaneseData = Boolean(japaneseData);
   const japaneseDownloadInProgress =
@@ -177,7 +192,7 @@ function App() {
   const isPending =
     koreanPending ||
     (showEnglish && englishPending) ||
-    (showRussian && russianPending) ||
+    russianDownloadInProgress ||
     japaneseDownloadInProgress ||
     italianDownloadInProgress;
   const loadError = koreanError
@@ -190,11 +205,7 @@ function App() {
       ? "KJV 데이터를 불러오지 못했습니다."
       : null;
   const russianLoadError =
-    !showRussian || koreanError
-      ? null
-      : russianError
-      ? "러시아어 성경 데이터를 불러오지 못했습니다."
-      : null;
+    !russianDataAllowed || koreanError ? null : russianDownloadError;
   const japaneseLoadError =
     !japaneseDataAllowed || koreanError ? null : japaneseDownloadError;
   const italianLoadError =
@@ -220,7 +231,7 @@ function App() {
         data: englishData,
       });
     }
-    if (russianData) {
+    if (russianDataReady && russianData) {
       sources.push({
         id: "rus",
         label: russianData.translation ?? "Русский Синодальный",
@@ -245,6 +256,7 @@ function App() {
   }, [
     koreanData,
     englishData,
+    russianDataReady,
     russianData,
     japaneseDataReady,
     japaneseData,
@@ -297,8 +309,10 @@ function App() {
     setShowRussian,
     setShowItalian,
     japaneseDataAllowed,
+    russianDataAllowed,
     italianDataAllowed,
     japaneseDataReady,
+    russianDataReady,
     italianDataReady,
   });
 
@@ -516,6 +530,20 @@ function App() {
   const toggleJapanese = () => setShowJapanese(!showJapanese);
   const toggleItalian = () => setShowItalian(!showItalian);
   const toggleFurigana = () => setShowFurigana(!showFurigana);
+  const requestRussianData = useCallback(() => {
+    if (!russianDataAllowed) {
+      setRussianDataAllowed(true);
+      return;
+    }
+    if (russianDownloadError) {
+      void refetchRussian();
+    }
+  }, [
+    russianDataAllowed,
+    russianDownloadError,
+    refetchRussian,
+    setRussianDataAllowed,
+  ]);
   const requestJapaneseData = useCallback(() => {
     if (!japaneseDataAllowed) {
       setJapaneseDataAllowed(true);
@@ -882,7 +910,10 @@ function App() {
             {!isPending && !loadError && englishLoadError && showEnglish && (
               <span className="badge warn">KJV 오류</span>
             )}
-            {!isPending && !loadError && russianLoadError && showRussian && (
+            {!isPending &&
+              !loadError &&
+              russianLoadError &&
+              russianDataAllowed && (
               <span className="badge warn">러시아어 데이터 오류</span>
             )}
             {!isPending &&
@@ -1141,6 +1172,10 @@ function App() {
         toggleEnglish={toggleEnglish}
         showRussian={showRussian}
         toggleRussian={toggleRussian}
+        russianDataReady={russianDataReady}
+        russianDownloadInProgress={russianDownloadInProgress}
+        russianDownloadError={russianDownloadError}
+        onDownloadRussian={requestRussianData}
         showJapanese={showJapanese}
         toggleJapanese={toggleJapanese}
         showItalian={showItalian}
