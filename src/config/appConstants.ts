@@ -6,6 +6,8 @@ export const SHOW_ENGLISH_KEY = "simple-bible:show-english";
 export const SHOW_JAPANESE_KEY = "simple-bible:show-japanese";
 export const SHOW_FURIGANA_KEY = "simple-bible:show-furigana";
 export const SHOW_RUSSIAN_KEY = "simple-bible:show-russian";
+export const SHOW_HEBREW_KEY = "simple-bible:show-hebrew";
+export const SHOW_ORIGINAL_KEY = "simple-bible:show-original";
 
 export const SEARCH_LIMIT = 120;
 
@@ -23,3 +25,5 @@ export const THEME_COLORS = {
 export const JAPANESE_DATA_SIZE_LABEL = "약 21MB";
 export const RUSSIAN_DATA_SIZE_LABEL = "약 7.1MB";
 export const ITALIAN_DATA_SIZE_LABEL = "약 4.7MB";
+export const HEBREW_DATA_SIZE_LABEL = "약 5.7MB";
+export const ORIGINAL_DATA_SIZE_LABEL = "약 7.3MB";

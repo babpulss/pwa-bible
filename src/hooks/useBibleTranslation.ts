@@ -7,6 +7,7 @@ const TRANSLATION_SOURCES = {
   ja: "/data/japanese_bible.json",
   ita: "/data/italian_bible.json",
   rus: "/data/russian_bible.json",
+  org: "/data/original_bible.json",
 } as const;
 
 export type TranslationKey = keyof typeof TRANSLATION_SOURCES;

@@ -7,6 +7,8 @@ import {
   SHOW_JAPANESE_KEY,
   SHOW_KOREAN_KEY,
   SHOW_RUSSIAN_KEY,
+  SHOW_HEBREW_KEY,
+  SHOW_ORIGINAL_KEY,
   STORAGE_KEY,
   THEME_COLORS,
   THEME_KEY,
@@ -53,19 +55,27 @@ type SelectedVerseParams = {
 type TranslationPreferencesParams = {
   showKorean: boolean;
   showEnglish: boolean;
+  showHebrew: boolean;
   showJapanese: boolean;
   showRussian: boolean;
   showItalian: boolean;
+  showOriginal: boolean;
   showFurigana: boolean;
+  setShowHebrew: (value: boolean) => void;
   setShowJapanese: (value: boolean) => void;
   setShowRussian: (value: boolean) => void;
   setShowItalian: (value: boolean) => void;
+  setShowOriginal: (value: boolean) => void;
   japaneseDataAllowed: boolean;
   russianDataAllowed: boolean;
   italianDataAllowed: boolean;
+  hebrewDataAllowed: boolean;
+  originalDataAllowed: boolean;
   japaneseDataReady: boolean;
   russianDataReady: boolean;
   italianDataReady: boolean;
+  hebrewDataReady: boolean;
+  originalDataReady: boolean;
 };
 
 type SearchEffectsParams = {
@@ -355,26 +365,38 @@ export const useWakeLockEffect = (
 export const useTranslationPreferences = ({
   showKorean,
   showEnglish,
+  showHebrew,
+  showOriginal,
   showJapanese,
   showRussian,
   showItalian,
   showFurigana,
+  setShowHebrew,
+  setShowOriginal,
   setShowJapanese,
   setShowRussian,
   setShowItalian,
   japaneseDataAllowed,
   italianDataAllowed,
+  hebrewDataAllowed,
+  originalDataAllowed,
   japaneseDataReady,
   russianDataAllowed,
   russianDataReady,
   italianDataReady,
+  hebrewDataReady,
+  originalDataReady,
 }: TranslationPreferencesParams) => {
   const japaneseAllowedPrevRef = useRef(japaneseDataAllowed);
   const russianAllowedPrevRef = useRef(russianDataAllowed);
   const italianAllowedPrevRef = useRef(italianDataAllowed);
+  const hebrewAllowedPrevRef = useRef(hebrewDataAllowed);
+  const originalAllowedPrevRef = useRef(originalDataAllowed);
   const japaneseAutoEnablePendingRef = useRef(false);
   const russianAutoEnablePendingRef = useRef(false);
   const italianAutoEnablePendingRef = useRef(false);
+  const hebrewAutoEnablePendingRef = useRef(false);
+  const originalAutoEnablePendingRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -389,6 +411,13 @@ export const useTranslationPreferences = ({
     }
     window.localStorage.setItem(SHOW_ENGLISH_KEY, String(showEnglish));
   }, [showEnglish]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    window.localStorage.setItem(SHOW_HEBREW_KEY, String(showHebrew));
+  }, [showHebrew]);
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -412,6 +441,13 @@ export const useTranslationPreferences = ({
   }, [showFurigana]);
 
   useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    window.localStorage.setItem(SHOW_ORIGINAL_KEY, String(showOriginal));
+  }, [showOriginal]);
+
+  useEffect(() => {
     if (!japaneseDataAllowed && showJapanese) {
       setShowJapanese(false);
     }
@@ -428,6 +464,18 @@ export const useTranslationPreferences = ({
       setShowItalian(false);
     }
   }, [italianDataAllowed, showItalian, setShowItalian]);
+
+  useEffect(() => {
+    if (!hebrewDataAllowed && showHebrew) {
+      setShowHebrew(false);
+    }
+  }, [hebrewDataAllowed, showHebrew, setShowHebrew]);
+
+  useEffect(() => {
+    if (!originalDataAllowed && showOriginal) {
+      setShowOriginal(false);
+    }
+  }, [originalDataAllowed, showOriginal, setShowOriginal]);
 
   useEffect(() => {
     const prev = japaneseAllowedPrevRef.current;
@@ -458,6 +506,26 @@ export const useTranslationPreferences = ({
     }
     italianAllowedPrevRef.current = italianDataAllowed;
   }, [italianDataAllowed]);
+
+  useEffect(() => {
+    const prev = hebrewAllowedPrevRef.current;
+    if (!prev && hebrewDataAllowed) {
+      hebrewAutoEnablePendingRef.current = true;
+    } else if (prev && !hebrewDataAllowed) {
+      hebrewAutoEnablePendingRef.current = false;
+    }
+    hebrewAllowedPrevRef.current = hebrewDataAllowed;
+  }, [hebrewDataAllowed]);
+
+  useEffect(() => {
+    const prev = originalAllowedPrevRef.current;
+    if (!prev && originalDataAllowed) {
+      originalAutoEnablePendingRef.current = true;
+    } else if (prev && !originalDataAllowed) {
+      originalAutoEnablePendingRef.current = false;
+    }
+    originalAllowedPrevRef.current = originalDataAllowed;
+  }, [originalDataAllowed]);
 
   useEffect(() => {
     if (
@@ -503,6 +571,35 @@ export const useTranslationPreferences = ({
     italianDataReady,
     setShowItalian,
     showItalian,
+  ]);
+
+  useEffect(() => {
+    if (
+      hebrewAutoEnablePendingRef.current &&
+      hebrewDataAllowed &&
+      hebrewDataReady &&
+      !showHebrew
+    ) {
+      hebrewAutoEnablePendingRef.current = false;
+      setShowHebrew(true);
+    }
+  }, [hebrewDataAllowed, hebrewDataReady, setShowHebrew, showHebrew]);
+
+  useEffect(() => {
+    if (
+      originalAutoEnablePendingRef.current &&
+      originalDataAllowed &&
+      originalDataReady &&
+      !showOriginal
+    ) {
+      originalAutoEnablePendingRef.current = false;
+      setShowOriginal(true);
+    }
+  }, [
+    originalDataAllowed,
+    originalDataReady,
+    setShowOriginal,
+    showOriginal,
   ]);
 };
 

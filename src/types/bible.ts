@@ -27,7 +27,14 @@ export type Selection = {
 
 export type Theme = "light" | "dark" | "highContrast";
 
-export type TranslationId = "kor" | "kjv" | "ja" | "ita" | "rus";
+export type TranslationId =
+  | "kor"
+  | "kjv"
+  | "ja"
+  | "ita"
+  | "rus"
+  | "heb"
+  | "org";
 
 export type SearchResult = {
   bookNumber: number;

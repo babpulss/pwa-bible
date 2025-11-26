@@ -19,13 +19,17 @@ type AppState = {
   fontScale: number;
   showKorean: boolean;
   showEnglish: boolean;
+  showHebrew: boolean;
   showJapanese: boolean;
   showRussian: boolean;
   showItalian: boolean;
+  showOriginal: boolean;
   showFurigana: boolean;
   japaneseDataAllowed: boolean;
   russianDataAllowed: boolean;
   italianDataAllowed: boolean;
+  hebrewDataAllowed: boolean;
+  originalDataAllowed: boolean;
 
   wakeLockEnabled: boolean;
 
@@ -57,17 +61,23 @@ type AppState = {
   toggleKorean: () => void;
   setShowEnglish: (v: boolean) => void;
   toggleEnglish: () => void;
+  setShowHebrew: (v: boolean) => void;
+  toggleHebrew: () => void;
   setShowJapanese: (v: boolean) => void;
   toggleJapanese: () => void;
   setShowRussian: (v: boolean) => void;
   toggleRussian: () => void;
   setShowItalian: (v: boolean) => void;
   toggleItalian: () => void;
+  setShowOriginal: (v: boolean) => void;
+  toggleOriginal: () => void;
   setShowFurigana: (v: boolean) => void;
   toggleFurigana: () => void;
   setJapaneseDataAllowed: (v: boolean) => void;
   setRussianDataAllowed: (v: boolean) => void;
   setItalianDataAllowed: (v: boolean) => void;
+  setHebrewDataAllowed: (v: boolean) => void;
+  setOriginalDataAllowed: (v: boolean) => void;
 
   setShowSearch: (v: boolean) => void;
   toggleSearch: () => void;
@@ -104,13 +114,17 @@ export const useAppStore = create<AppState>()(
       fontScale: BASE_FONT_SCALE,
       showKorean: true,
       showEnglish: true,
+      showHebrew: false,
       showJapanese: false,
       showRussian: false,
       showItalian: false,
+      showOriginal: false,
       showFurigana: true,
       japaneseDataAllowed: false,
       russianDataAllowed: false,
       italianDataAllowed: false,
+      hebrewDataAllowed: false,
+      originalDataAllowed: false,
       wakeLockEnabled: false,
 
       showSearch: false,
@@ -162,6 +176,9 @@ export const useAppStore = create<AppState>()(
       setShowEnglish: (v: boolean) => set({ showEnglish: v }),
       toggleEnglish: () =>
         set((s: AppState) => ({ showEnglish: !s.showEnglish })),
+      setShowHebrew: (v: boolean) => set({ showHebrew: v }),
+      toggleHebrew: () =>
+        set((s: AppState) => ({ showHebrew: !s.showHebrew })),
       setShowJapanese: (v: boolean) => set({ showJapanese: v }),
       toggleJapanese: () =>
         set((s: AppState) => ({ showJapanese: !s.showJapanese })),
@@ -171,12 +188,17 @@ export const useAppStore = create<AppState>()(
       setShowItalian: (v: boolean) => set({ showItalian: v }),
       toggleItalian: () =>
         set((s: AppState) => ({ showItalian: !s.showItalian })),
+      setShowOriginal: (v: boolean) => set({ showOriginal: v }),
+      toggleOriginal: () =>
+        set((s: AppState) => ({ showOriginal: !s.showOriginal })),
       setShowFurigana: (v: boolean) => set({ showFurigana: v }),
       toggleFurigana: () =>
         set((s: AppState) => ({ showFurigana: !s.showFurigana })),
       setJapaneseDataAllowed: (v: boolean) => set({ japaneseDataAllowed: v }),
       setRussianDataAllowed: (v: boolean) => set({ russianDataAllowed: v }),
       setItalianDataAllowed: (v: boolean) => set({ italianDataAllowed: v }),
+      setHebrewDataAllowed: (v: boolean) => set({ hebrewDataAllowed: v }),
+      setOriginalDataAllowed: (v: boolean) => set({ originalDataAllowed: v }),
 
       setShowSearch: (v: boolean) => set({ showSearch: v }),
       toggleSearch: () => set((s: AppState) => ({ showSearch: !s.showSearch })),
@@ -206,13 +228,17 @@ export const useAppStore = create<AppState>()(
         fontScale: state.fontScale,
         showKorean: state.showKorean,
         showEnglish: state.showEnglish,
+        showHebrew: state.showHebrew,
         showJapanese: state.showJapanese,
         showRussian: state.showRussian,
         showItalian: state.showItalian,
+        showOriginal: state.showOriginal,
         showFurigana: state.showFurigana,
         japaneseDataAllowed: state.japaneseDataAllowed,
         russianDataAllowed: state.russianDataAllowed,
         italianDataAllowed: state.italianDataAllowed,
+        hebrewDataAllowed: state.hebrewDataAllowed,
+        originalDataAllowed: state.originalDataAllowed,
         searchScope: state.searchScope,
         searchBookNumber: state.searchBookNumber,
         wakeLockEnabled: state.wakeLockEnabled,

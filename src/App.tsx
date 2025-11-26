@@ -100,12 +100,16 @@ function App() {
   const setShowKorean = useAppStore((s) => s.setShowKorean);
   const showEnglish = useAppStore((s) => s.showEnglish);
   const setShowEnglish = useAppStore((s) => s.setShowEnglish);
+  const showHebrew = useAppStore((s) => s.showHebrew);
+  const setShowHebrew = useAppStore((s) => s.setShowHebrew);
   const showJapanese = useAppStore((s) => s.showJapanese);
   const setShowJapanese = useAppStore((s) => s.setShowJapanese);
   const showRussian = useAppStore((s) => s.showRussian);
   const setShowRussian = useAppStore((s) => s.setShowRussian);
   const showItalian = useAppStore((s) => s.showItalian);
   const setShowItalian = useAppStore((s) => s.setShowItalian);
+  const showOriginal = useAppStore((s) => s.showOriginal);
+  const setShowOriginal = useAppStore((s) => s.setShowOriginal);
   const showFurigana = useAppStore((s) => s.showFurigana);
   const setShowFurigana = useAppStore((s) => s.setShowFurigana);
   const japaneseDataAllowed = useAppStore((s) => s.japaneseDataAllowed);
@@ -114,6 +118,10 @@ function App() {
   const setRussianDataAllowed = useAppStore((s) => s.setRussianDataAllowed);
   const italianDataAllowed = useAppStore((s) => s.italianDataAllowed);
   const setItalianDataAllowed = useAppStore((s) => s.setItalianDataAllowed);
+  const hebrewDataAllowed = useAppStore((s) => s.hebrewDataAllowed);
+  const setHebrewDataAllowed = useAppStore((s) => s.setHebrewDataAllowed);
+  const originalDataAllowed = useAppStore((s) => s.originalDataAllowed);
+  const setOriginalDataAllowed = useAppStore((s) => s.setOriginalDataAllowed);
   const wakeLockEnabled = useAppStore((s) => s.wakeLockEnabled);
   const setWakeLockEnabled = useAppStore((s) => s.setWakeLockEnabled);
   const searchToggleRef = useRef<HTMLButtonElement | null>(null);
@@ -134,6 +142,20 @@ function App() {
     isPending: englishPending,
     error: englishError,
   } = useBibleTranslation("kjv");
+  const {
+    data: hebrewData,
+    isPending: hebrewPending,
+    isFetching: hebrewFetching,
+    error: hebrewError,
+    refetch: refetchHebrew,
+  } = useBibleTranslation("heb", { enabled: hebrewDataAllowed });
+  const {
+    data: originalData,
+    isPending: originalPending,
+    isFetching: originalFetching,
+    error: originalError,
+    refetch: refetchOriginal,
+  } = useBibleTranslation("org", { enabled: originalDataAllowed });
   const {
     data: japaneseData,
     isPending: japanesePending,
@@ -156,7 +178,26 @@ function App() {
     error: russianError,
     refetch: refetchRussian,
   } = useBibleTranslation("rus", { enabled: russianDataAllowed });
-
+  const hasHebrewData = Boolean(hebrewData);
+  const hebrewDownloadInProgress =
+    hebrewDataAllowed &&
+    ((hebrewPending && !hasHebrewData) ||
+      (hebrewFetching && !hasHebrewData));
+  const hebrewDataReady = hebrewDataAllowed && hasHebrewData;
+  const hebrewDownloadError =
+    hebrewDataAllowed && hebrewError
+      ? "히브리어 성경 데이터를 내려받는 중 오류가 발생했습니다. 설정에서 다시 시도해 주세요."
+      : null;
+  const hasOriginalData = Boolean(originalData);
+  const originalDownloadInProgress =
+    originalDataAllowed &&
+    ((originalPending && !hasOriginalData) ||
+      (originalFetching && !hasOriginalData));
+  const originalDataReady = originalDataAllowed && hasOriginalData;
+  const originalDownloadError =
+    originalDataAllowed && originalError
+      ? "원문(히브리어/헬라어) 데이터를 내려받는 중 오류가 발생했습니다. 설정에서 다시 시도해 주세요."
+      : null;
   const hasRussianData = Boolean(russianData);
   const russianDownloadInProgress =
     russianDataAllowed &&
@@ -188,10 +229,11 @@ function App() {
     italianDataAllowed && italianError
       ? "이탈리아어 성경 데이터를 내려받는 중 오류가 발생했습니다. 설정에서 다시 시도해 주세요."
       : null;
-
   const isPending =
     koreanPending ||
     (showEnglish && englishPending) ||
+    hebrewDownloadInProgress ||
+    originalDownloadInProgress ||
     russianDownloadInProgress ||
     japaneseDownloadInProgress ||
     italianDownloadInProgress;
@@ -204,6 +246,10 @@ function App() {
       : englishError
       ? "KJV 데이터를 불러오지 못했습니다."
       : null;
+  const hebrewLoadError =
+    !hebrewDataAllowed || koreanError ? null : hebrewDownloadError;
+  const originalLoadError =
+    !originalDataAllowed || koreanError ? null : originalDownloadError;
   const russianLoadError =
     !russianDataAllowed || koreanError ? null : russianDownloadError;
   const japaneseLoadError =
@@ -229,6 +275,20 @@ function App() {
         id: "kjv",
         label: englishData.translation ?? "KJV",
         data: englishData,
+      });
+    }
+    if (hebrewDataReady && hebrewData) {
+      sources.push({
+        id: "heb",
+        label: hebrewData.translation ?? "히브리어 원문",
+        data: hebrewData,
+      });
+    }
+    if (originalDataReady && originalData) {
+      sources.push({
+        id: "org",
+        label: originalData.translation ?? "성경 원문 (합본)",
+        data: originalData,
       });
     }
     if (russianDataReady && russianData) {
@@ -262,6 +322,10 @@ function App() {
     japaneseData,
     italianDataReady,
     italianData,
+    hebrewDataReady,
+    hebrewData,
+    originalDataReady,
+    originalData,
   ]);
 
   const searchReady = searchSources.length > 0;
@@ -301,19 +365,27 @@ function App() {
   useTranslationPreferences({
     showKorean,
     showEnglish,
+    showHebrew,
     showJapanese,
     showRussian,
     showItalian,
+    showOriginal,
     showFurigana,
+    setShowHebrew,
     setShowJapanese,
     setShowRussian,
     setShowItalian,
+    setShowOriginal,
     japaneseDataAllowed,
     russianDataAllowed,
     italianDataAllowed,
+    hebrewDataAllowed,
+    originalDataAllowed,
     japaneseDataReady,
     russianDataReady,
     italianDataReady,
+    hebrewDataReady,
+    originalDataReady,
   });
 
   const wakeLockSupported =
@@ -340,6 +412,20 @@ function App() {
     }
     return currentBook.chapters[chapterIndex] ?? null;
   }, [currentBook, chapterIndex]);
+
+  const hebrewBook = useMemo(() => {
+    if (!showHebrew || !hebrewData) {
+      return null;
+    }
+    return hebrewData.books[bookIndex] ?? null;
+  }, [hebrewData, bookIndex, showHebrew]);
+
+  const hebrewChapter = useMemo(() => {
+    if (!showHebrew || !hebrewBook) {
+      return null;
+    }
+    return hebrewBook.chapters[chapterIndex] ?? null;
+  }, [hebrewBook, chapterIndex, showHebrew]);
 
   const englishBook = useMemo(() => {
     if (!showEnglish || !englishData) {
@@ -397,6 +483,20 @@ function App() {
     return italianBook.chapters[chapterIndex] ?? null;
   }, [italianBook, chapterIndex, showItalian]);
 
+  const originalBook = useMemo(() => {
+    if (!showOriginal || !originalData) {
+      return null;
+    }
+    return originalData.books[bookIndex] ?? null;
+  }, [originalData, bookIndex, showOriginal]);
+
+  const originalChapter = useMemo(() => {
+    if (!showOriginal || !originalBook) {
+      return null;
+    }
+    return originalBook.chapters[chapterIndex] ?? null;
+  }, [originalBook, chapterIndex, showOriginal]);
+
   useSelectedVerseEffects({
     currentChapter,
     setSelectedVerse,
@@ -446,9 +546,11 @@ function App() {
 
   const showKoreanColumn = Boolean(showKorean && currentChapter);
   const showEnglishColumn = Boolean(showEnglish && englishChapter);
+  const showHebrewColumn = Boolean(showHebrew && hebrewChapter);
   const showRussianColumn = Boolean(showRussian && russianChapter);
   const showJapaneseColumn = Boolean(showJapanese && japaneseChapter);
   const showItalianColumn = Boolean(showItalian && italianChapter);
+  const showOriginalColumn = Boolean(showOriginal && originalChapter);
 
   const combinedVerses = useMemo(() => {
     if (!currentChapter) {
@@ -466,6 +568,12 @@ function App() {
         russianMap.set(verse.number, verse.text);
       });
     }
+    const hebrewMap = new Map<number, string>();
+    if (hebrewChapter) {
+      hebrewChapter.verses.forEach((verse) => {
+        hebrewMap.set(verse.number, verse.text);
+      });
+    }
     const japaneseMap = new Map<number, string>();
     if (japaneseChapter) {
       japaneseChapter.verses.forEach((verse) => {
@@ -478,34 +586,52 @@ function App() {
         italianMap.set(verse.number, verse.text);
       });
     }
+    const originalMap = new Map<number, string>();
+    if (originalChapter) {
+      originalChapter.verses.forEach((verse) => {
+        originalMap.set(verse.number, verse.text);
+      });
+    }
     return currentChapter.verses.map((verse) => ({
       number: verse.number,
       korean: verse.text,
       english: englishMap.get(verse.number) ?? "",
+      hebrew: hebrewMap.get(verse.number) ?? "",
       russian: russianMap.get(verse.number) ?? "",
       japanese: japaneseMap.get(verse.number) ?? "",
       italian: italianMap.get(verse.number) ?? "",
+      original: originalMap.get(verse.number) ?? "",
     }));
   }, [
     currentChapter,
     englishChapter,
+    hebrewChapter,
     russianChapter,
     japaneseChapter,
     italianChapter,
+    originalChapter,
   ]);
 
   const activeColumns =
     Number(showKoreanColumn) +
     Number(showEnglishColumn) +
+    Number(showHebrewColumn) +
     Number(showRussianColumn) +
     Number(showJapaneseColumn) +
-    Number(showItalianColumn);
+    Number(showItalianColumn) +
+    Number(showOriginalColumn);
 
   const verseListClass = useMemo(() => {
-    if (activeColumns >= 5) {
+    if (activeColumns === 7) {
+      return "verses verses--hepta";
+    }
+    if (activeColumns === 6) {
+      return "verses verses--hexa";
+    }
+    if (activeColumns === 5) {
       return "verses verses--penta";
     }
-    if (activeColumns >= 4) {
+    if (activeColumns === 4) {
       return "verses verses--quad";
     }
     if (activeColumns === 3) {
@@ -526,9 +652,11 @@ function App() {
   const decreaseFont = () => adjustFontScale(-FONT_STEP);
   const toggleKorean = () => setShowKorean(!showKorean);
   const toggleEnglish = () => setShowEnglish(!showEnglish);
+  const toggleHebrew = () => setShowHebrew(!showHebrew);
   const toggleRussian = () => setShowRussian(!showRussian);
   const toggleJapanese = () => setShowJapanese(!showJapanese);
   const toggleItalian = () => setShowItalian(!showItalian);
+  const toggleOriginal = () => setShowOriginal(!showOriginal);
   const toggleFurigana = () => setShowFurigana(!showFurigana);
   const requestRussianData = useCallback(() => {
     if (!russianDataAllowed) {
@@ -573,6 +701,29 @@ function App() {
     refetchItalian,
     setItalianDataAllowed,
   ]);
+  const requestOriginalData = useCallback(() => {
+    if (!originalDataAllowed) {
+      setOriginalDataAllowed(true);
+      return;
+    }
+    if (originalDownloadError) {
+      void refetchOriginal();
+    }
+  }, [
+    originalDataAllowed,
+    originalDownloadError,
+    refetchOriginal,
+    setOriginalDataAllowed,
+  ]);
+  const requestHebrewData = useCallback(() => {
+    if (!hebrewDataAllowed) {
+      setHebrewDataAllowed(true);
+      return;
+    }
+    if (hebrewDownloadError) {
+      void refetchHebrew();
+    }
+  }, [hebrewDataAllowed, hebrewDownloadError, refetchHebrew, setHebrewDataAllowed]);
 
   // Chapter navigation helpers
   const canGoPrev = useMemo(() => {
@@ -1000,6 +1151,9 @@ function App() {
                   {showEnglishColumn && (
                     <span>{englishData?.translation ?? "KJV"}</span>
                   )}
+                  {showHebrewColumn && (
+                    <span>{hebrewData?.translation ?? "히브리어 원문"}</span>
+                  )}
                   {showRussianColumn && (
                     <span>
                       {russianData?.translation ?? "Русский синодальный"}
@@ -1011,16 +1165,30 @@ function App() {
                   {showItalianColumn && (
                     <span>{italianData?.translation ?? "Italiano 1927"}</span>
                   )}
+                  {showOriginalColumn && (
+                    <span>
+                      {originalData?.translation ?? "성경 원문 (합본)"}
+                    </span>
+                  )}
                 </div>
               </header>
               {englishLoadError && showEnglish && (
                 <p className="empty-state secondary">{englishLoadError}</p>
+              )}
+              {hebrewLoadError && showHebrew && (
+                <p className="empty-state secondary">{hebrewLoadError}</p>
+              )}
+              {originalLoadError && showOriginal && (
+                <p className="empty-state secondary">{originalLoadError}</p>
               )}
               {russianLoadError && showRussian && (
                 <p className="empty-state secondary">{russianLoadError}</p>
               )}
               {japaneseLoadError && showJapanese && (
                 <p className="empty-state secondary">{japaneseLoadError}</p>
+              )}
+              {italianLoadError && showItalian && (
+                <p className="empty-state secondary">{italianLoadError}</p>
               )}
               {activeColumns === 0 ? (
                 <p className="empty-state secondary">
@@ -1045,6 +1213,14 @@ function App() {
                           <span className="verse-number">{verse.number}</span>
                           <span className="verse-text">
                             {verse.english || "—"}
+                          </span>
+                        </div>
+                      )}
+                      {showHebrewColumn && (
+                        <div className="verse-column verse-column--secondary">
+                          <span className="verse-number">{verse.number}</span>
+                          <span className="verse-text">
+                            {verse.hebrew || "—"}
                           </span>
                         </div>
                       )}
@@ -1079,6 +1255,14 @@ function App() {
                           <span className="verse-number">{verse.number}</span>
                           <span className="verse-text">
                             {verse.italian || "—"}
+                          </span>
+                        </div>
+                      )}
+                      {showOriginalColumn && (
+                        <div className="verse-column verse-column--secondary">
+                          <span className="verse-number">{verse.number}</span>
+                          <span className="verse-text">
+                            {verse.original || "—"}
                           </span>
                         </div>
                       )}
@@ -1180,6 +1364,8 @@ function App() {
         toggleJapanese={toggleJapanese}
         showItalian={showItalian}
         toggleItalian={toggleItalian}
+        showOriginal={showOriginal}
+        toggleOriginal={toggleOriginal}
         showFurigana={showFurigana}
         toggleFurigana={toggleFurigana}
         japaneseDataReady={japaneseDataReady}
@@ -1190,6 +1376,10 @@ function App() {
         italianDownloadInProgress={italianDownloadInProgress}
         italianDownloadError={italianDownloadError}
         onDownloadItalian={requestItalianData}
+        originalDataReady={originalDataReady}
+        originalDownloadInProgress={originalDownloadInProgress}
+        originalDownloadError={originalDownloadError}
+        onDownloadOriginal={requestOriginalData}
       />
 
       <footer className="app-footer">

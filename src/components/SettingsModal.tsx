@@ -6,6 +6,7 @@ import {
   ITALIAN_DATA_SIZE_LABEL,
   JAPANESE_DATA_SIZE_LABEL,
   RUSSIAN_DATA_SIZE_LABEL,
+  ORIGINAL_DATA_SIZE_LABEL,
   MAX_FONT_SCALE,
   MIN_FONT_SCALE,
 } from "../config/appConstants";
@@ -34,6 +35,8 @@ type Props = {
   toggleJapanese: () => void;
   showItalian: boolean;
   toggleItalian: () => void;
+  showOriginal: boolean;
+  toggleOriginal: () => void;
   showFurigana: boolean;
   toggleFurigana: () => void;
   russianDataReady: boolean;
@@ -48,6 +51,10 @@ type Props = {
   italianDownloadInProgress: boolean;
   italianDownloadError: string | null;
   onDownloadItalian: () => void;
+  originalDataReady: boolean;
+  originalDownloadInProgress: boolean;
+  originalDownloadError: string | null;
+  onDownloadOriginal: () => void;
 };
 
 export function SettingsModal(props: Props) {
@@ -69,6 +76,8 @@ export function SettingsModal(props: Props) {
     toggleKorean,
     showEnglish,
     toggleEnglish,
+    showOriginal,
+    toggleOriginal,
     showRussian,
     toggleRussian,
     showJapanese,
@@ -89,6 +98,10 @@ export function SettingsModal(props: Props) {
     italianDownloadInProgress,
     italianDownloadError,
     onDownloadItalian,
+    originalDataReady,
+    originalDownloadInProgress,
+    originalDownloadError,
+    onDownloadOriginal,
   } = props;
 
   const displayPercent =
@@ -442,6 +455,52 @@ export function SettingsModal(props: Props) {
             </div>
           </div>
 
+          <div className="settings__row">
+            <div className="settings__label">원문 보기</div>
+            <div className="settings__control settings__control--column">
+              <div
+                style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}
+              >
+                <label className="toggle" aria-label="히브리어 원문 표시">
+                  <span className="toggle__switch">
+                    <input
+                      type="checkbox"
+                      checked={showOriginal}
+                      onChange={toggleOriginal}
+                      disabled={!originalDataReady}
+                    />
+                    <span className="toggle__indicator" />
+                  </span>
+                  <span className="toggle__label">표시</span>
+                </label>
+              </div>
+              {!originalDataReady && (
+                <>
+                  <div className="settings__action-row">
+                    <p className="settings__hint">
+                      원문 데이터({ORIGINAL_DATA_SIZE_LABEL})는 구약(히브리어) +
+                      신약(헬라어)을 포함하며 직접
+                      다운로드 후 사용할 수 있습니다.
+                    </p>
+                    <button
+                      type="button"
+                      className="settings__action-button"
+                      onClick={onDownloadOriginal}
+                      disabled={originalDownloadInProgress}
+                    >
+                      {originalDownloadInProgress ? "다운로드 중…" : "다운로드"}
+                    </button>
+                  </div>
+                  {originalDownloadError && (
+                    <p className="settings__hint settings__hint--error">
+                      {originalDownloadError}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
         </div>
         <div className="settings__row settings__row--info" id="license-info">
           <div className="settings__label settings__label--top">정보</div>
@@ -470,6 +529,21 @@ export function SettingsModal(props: Props) {
                 <strong>La Sacra Bibbia Riveduta 1927 (Italiano)</strong>은
                 Società Biblica di Ginevra가 배포한 Riveduta 1927 판본으로,
                 퍼블릭 도메인에 해당합니다.
+              </p>
+              <p style={{ margin: "0.5rem 0 0" }}>
+                <strong>히브리어 구약 (WLC)</strong>은 Westminster Leningrad
+                Codex 공용본을 기반으로 한 히브리어 본문이며, 퍼블릭 도메인으로
+                제공됩니다.
+              </p>
+              <p style={{ margin: "0.5rem 0 0" }}>
+                <strong>헬라어 신약 (Byzantine Textform 2013)</strong>은
+                퍼블릭 도메인으로 공개된 다수본문(비잔틴) 신약 본문이며,
+                신약 성경에서만 제공됩니다.
+              </p>
+              <p style={{ margin: "0.5rem 0 0" }}>
+                <strong>원문(히브리어/헬라어) 합본</strong>은 구약 히브리어
+                본문(WLC)와 신약 헬라어 본문(Byzantine Textform 2013)을 합쳐
+                제공합니다.
               </p>
               <p style={{ margin: "0.5rem 0 0" }}>
                 데이터는 최초 접속 시 내려받아 기기에 저장되며, 이후에는
