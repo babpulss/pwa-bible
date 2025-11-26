@@ -1,7 +1,7 @@
 # 오프라인 성경 PWA
 [https://pwa-bible.babpulss.workers.dev/](https://pwa-bible.babpulss.workers.dev/)
 
-광고나 부가 기능 없이 성경 본문을 빠르게 읽고 검색할 수 있도록 만든 Vite + React 기반 PWA입니다. 최초 접속 시 `public/data/korean_bible.json`(개역한글)과 `public/data/kjv_bible.json`(KJV)을 내려받아 `service worker`에 캐시하며, 설정에서 러시아어·원문(히브리어/헬라어)·일본어·이탈리아어 번역을 활성화하면 `public/data/russian_bible.json`(RUSV), `public/data/original_bible.json`(WLC + Byzantine Textform 2013), `public/data/japanese_bible.json`(口語訳聖書, 루비 포함), `public/data/italian_bible.json`(La Sacra Bibbia Riveduta 1927)도 동일하게 오프라인 캐시에 추가됩니다. 추가로 `public/data/niv_bible.json`(NIV) 데이터가 포함되어 있으나 라이선스 특성상 기본 UI에서는 사용하지 않습니다.
+광고나 부가 기능 없이 성경 본문을 빠르게 읽고 검색할 수 있도록 만든 Vite + React 기반 PWA입니다. 최초 접속 시 `public/data/korean_bible.json`(개역한글)과 `public/data/kjv_bible.json`(KJV)을 내려받아 `service worker`에 캐시하며, 설정에서 러시아어·원문(히브리어/헬라어)·일본어·이탈리아어 번역을 활성화하면 `public/data/russian_bible.json`(RUSV), `public/data/original_bible.json`(WLC + Byzantine Textform 2013), `public/data/japanese_bible.json`(口語訳聖書, 루비 포함), `public/data/italian_bible.json`(La Sacra Bibbia Riveduta 1927)도 동일하게 오프라인 캐시에 추가됩니다. 
 
 ## 미리보기
 
@@ -51,7 +51,6 @@ npm run preview
 - 히브리어 구약 (WLC): Westminster Leningrad Codex 공용본을 기반으로 한 히브리어 본문으로, 퍼블릭 도메인에 해당합니다.
 - 헬라어 신약 (Byzantine Textform 2013): 퍼블릭 도메인으로 공개된 다수본문(비잔틴) 헬라어 신약 본문입니다.
 - 원문 합본: `public/data/original_bible.json`은 위 히브리어 구약(WLC)과 헬라어 신약(Byzantine Textform 2013)을 단일 파일로 병합한 데이터입니다.
-- NIV (New International Version): 저작권이 있는 번역본으로, 데이터 파일(`public/data/niv_bible.json`)은 테스트·연구 목적 보관용이며 라이선스 계약 없이 공개 배포하거나 서비스에 노출해서는 안 됩니다. 배포 시에는 반드시 제거하거나 별도 허가를 확보해야 합니다.
 - 본 프로젝트는 상기 안내에 따라 본문을 표시만 하며, 상업적 기능이나 2차 배포를 포함하지 않습니다. 배포 시에는 각 출처의 최신 정책을 재확인해 주세요.
 
 ## 구조
@@ -64,7 +63,6 @@ frontend/
     data/japanese_bible.json # 일본어 口語訳 본문 (루비 포함)
     data/italian_bible.json  # 이탈리아어 Riveduta 1927 본문
     data/original_bible.json # 히브리어 WLC + 헬라어 Byzantine Textform 2013 합본
-    data/niv_bible.json      # NIV 본문 (저작권 있음, 기본 UI 미연동)
     icons/                   # PWA 아이콘 세트
   src/
     App.tsx                  # 메인 리더 UI 및 검색
@@ -86,4 +84,4 @@ frontend/
 - 배포 시 저작권 고지와 라이선스 고지를 모든 사본 또는 실질적 부분에 포함해야 합니다.
 - 소프트웨어는 “있는 그대로(AS IS)” 제공되며, 어떠한 보증도 제공되지 않습니다.
 
-참고: 성경 데이터(개역한글, KJV, RUSV, 口語訳, La Sacra Bibbia Riveduta 1927, WLC, Byzantine Textform 2013, NIV)는 각각의 라이선스/공개 사용 안내에 따릅니다. 소스 코드의 MIT 라이선스는 애플리케이션 코드에 적용되며, 데이터 파일의 이용 조건은 위 “데이터 출처 및 저작권 고지” 섹션을 따릅니다. NIV는 별도 허가 없이 서비스에 노출하거나 배포해서는 안 되니 주의해 주세요. 자세한 내용은 저장소 루트의 LICENSE 파일을 참고하세요.
+참고: 성경 데이터(개역한글, KJV, RUSV, 口語訳, La Sacra Bibbia Riveduta 1927, WLC, Byzantine Textform 2013)는 각각의 라이선스/공개 사용 안내에 따릅니다. 소스 코드의 MIT 라이선스는 애플리케이션 코드에 적용되며, 데이터 파일의 이용 조건은 위 “데이터 출처 및 저작권 고지” 섹션을 따릅니다. 자세한 내용은 저장소 루트의 LICENSE 파일을 참고하세요.
