@@ -102,6 +102,8 @@ function App() {
   const setShowEnglish = useAppStore((s) => s.setShowEnglish);
   const showHebrew = useAppStore((s) => s.showHebrew);
   const setShowHebrew = useAppStore((s) => s.setShowHebrew);
+  const showChinese = useAppStore((s) => s.showChinese);
+  const setShowChinese = useAppStore((s) => s.setShowChinese);
   const showJapanese = useAppStore((s) => s.showJapanese);
   const setShowJapanese = useAppStore((s) => s.setShowJapanese);
   const showRussian = useAppStore((s) => s.showRussian);
@@ -112,6 +114,8 @@ function App() {
   const setShowOriginal = useAppStore((s) => s.setShowOriginal);
   const showFurigana = useAppStore((s) => s.showFurigana);
   const setShowFurigana = useAppStore((s) => s.setShowFurigana);
+  const chineseDataAllowed = useAppStore((s) => s.chineseDataAllowed);
+  const setChineseDataAllowed = useAppStore((s) => s.setChineseDataAllowed);
   const japaneseDataAllowed = useAppStore((s) => s.japaneseDataAllowed);
   const setJapaneseDataAllowed = useAppStore((s) => s.setJapaneseDataAllowed);
   const russianDataAllowed = useAppStore((s) => s.russianDataAllowed);
@@ -142,6 +146,13 @@ function App() {
     isPending: englishPending,
     error: englishError,
   } = useBibleTranslation("kjv");
+  const {
+    data: chineseData,
+    isPending: chinesePending,
+    isFetching: chineseFetching,
+    error: chineseError,
+    refetch: refetchChinese,
+  } = useBibleTranslation("zh", { enabled: chineseDataAllowed });
   const {
     data: hebrewData,
     isPending: hebrewPending,
@@ -198,6 +209,16 @@ function App() {
     originalDataAllowed && originalError
       ? "원문(히브리어/헬라어) 데이터를 내려받는 중 오류가 발생했습니다. 설정에서 다시 시도해 주세요."
       : null;
+  const hasChineseData = Boolean(chineseData);
+  const chineseDownloadInProgress =
+    chineseDataAllowed &&
+    ((chinesePending && !hasChineseData) ||
+      (chineseFetching && !hasChineseData));
+  const chineseDataReady = chineseDataAllowed && hasChineseData;
+  const chineseDownloadError =
+    chineseDataAllowed && chineseError
+      ? "중국어 성경 데이터를 내려받는 중 오류가 발생했습니다. 설정에서 다시 시도해 주세요."
+      : null;
   const hasRussianData = Boolean(russianData);
   const russianDownloadInProgress =
     russianDataAllowed &&
@@ -234,6 +255,7 @@ function App() {
     (showEnglish && englishPending) ||
     hebrewDownloadInProgress ||
     originalDownloadInProgress ||
+    chineseDownloadInProgress ||
     russianDownloadInProgress ||
     japaneseDownloadInProgress ||
     italianDownloadInProgress;
@@ -250,6 +272,8 @@ function App() {
     !hebrewDataAllowed || koreanError ? null : hebrewDownloadError;
   const originalLoadError =
     !originalDataAllowed || koreanError ? null : originalDownloadError;
+  const chineseLoadError =
+    !chineseDataAllowed || koreanError ? null : chineseDownloadError;
   const russianLoadError =
     !russianDataAllowed || koreanError ? null : russianDownloadError;
   const japaneseLoadError =
@@ -291,6 +315,13 @@ function App() {
         data: originalData,
       });
     }
+    if (chineseDataReady && chineseData) {
+      sources.push({
+        id: "zh",
+        label: chineseData.translation ?? "중국어 성경",
+        data: chineseData,
+      });
+    }
     if (russianDataReady && russianData) {
       sources.push({
         id: "rus",
@@ -326,6 +357,8 @@ function App() {
     hebrewData,
     originalDataReady,
     originalData,
+    chineseDataReady,
+    chineseData,
   ]);
 
   const searchReady = searchSources.length > 0;
@@ -366,21 +399,25 @@ function App() {
     showKorean,
     showEnglish,
     showHebrew,
+    showChinese,
     showJapanese,
     showRussian,
     showItalian,
     showOriginal,
     showFurigana,
     setShowHebrew,
+    setShowChinese,
     setShowJapanese,
     setShowRussian,
     setShowItalian,
     setShowOriginal,
+    chineseDataAllowed,
     japaneseDataAllowed,
     russianDataAllowed,
     italianDataAllowed,
     hebrewDataAllowed,
     originalDataAllowed,
+    chineseDataReady,
     japaneseDataReady,
     russianDataReady,
     italianDataReady,
@@ -440,6 +477,20 @@ function App() {
     }
     return englishBook.chapters[chapterIndex] ?? null;
   }, [englishBook, chapterIndex, showEnglish]);
+
+  const chineseBook = useMemo(() => {
+    if (!showChinese || !chineseData) {
+      return null;
+    }
+    return chineseData.books[bookIndex] ?? null;
+  }, [chineseData, bookIndex, showChinese]);
+
+  const chineseChapter = useMemo(() => {
+    if (!showChinese || !chineseBook) {
+      return null;
+    }
+    return chineseBook.chapters[chapterIndex] ?? null;
+  }, [chineseBook, chapterIndex, showChinese]);
 
   const russianBook = useMemo(() => {
     if (!showRussian || !russianData) {
@@ -547,6 +598,7 @@ function App() {
   const showKoreanColumn = Boolean(showKorean && currentChapter);
   const showEnglishColumn = Boolean(showEnglish && englishChapter);
   const showHebrewColumn = Boolean(showHebrew && hebrewChapter);
+  const showChineseColumn = Boolean(showChinese && chineseChapter);
   const showRussianColumn = Boolean(showRussian && russianChapter);
   const showJapaneseColumn = Boolean(showJapanese && japaneseChapter);
   const showItalianColumn = Boolean(showItalian && italianChapter);
@@ -574,6 +626,12 @@ function App() {
         hebrewMap.set(verse.number, verse.text);
       });
     }
+    const chineseMap = new Map<number, string>();
+    if (chineseChapter) {
+      chineseChapter.verses.forEach((verse) => {
+        chineseMap.set(verse.number, verse.text);
+      });
+    }
     const japaneseMap = new Map<number, string>();
     if (japaneseChapter) {
       japaneseChapter.verses.forEach((verse) => {
@@ -597,6 +655,7 @@ function App() {
       korean: verse.text,
       english: englishMap.get(verse.number) ?? "",
       hebrew: hebrewMap.get(verse.number) ?? "",
+      chinese: chineseMap.get(verse.number) ?? "",
       russian: russianMap.get(verse.number) ?? "",
       japanese: japaneseMap.get(verse.number) ?? "",
       italian: italianMap.get(verse.number) ?? "",
@@ -606,6 +665,7 @@ function App() {
     currentChapter,
     englishChapter,
     hebrewChapter,
+    chineseChapter,
     russianChapter,
     japaneseChapter,
     italianChapter,
@@ -616,12 +676,16 @@ function App() {
     Number(showKoreanColumn) +
     Number(showEnglishColumn) +
     Number(showHebrewColumn) +
+    Number(showChineseColumn) +
     Number(showRussianColumn) +
     Number(showJapaneseColumn) +
     Number(showItalianColumn) +
     Number(showOriginalColumn);
 
   const verseListClass = useMemo(() => {
+    if (activeColumns === 8) {
+      return "verses verses--octa";
+    }
     if (activeColumns === 7) {
       return "verses verses--hepta";
     }
@@ -653,11 +717,26 @@ function App() {
   const toggleKorean = () => setShowKorean(!showKorean);
   const toggleEnglish = () => setShowEnglish(!showEnglish);
   const toggleHebrew = () => setShowHebrew(!showHebrew);
+  const toggleChinese = () => setShowChinese(!showChinese);
   const toggleRussian = () => setShowRussian(!showRussian);
   const toggleJapanese = () => setShowJapanese(!showJapanese);
   const toggleItalian = () => setShowItalian(!showItalian);
   const toggleOriginal = () => setShowOriginal(!showOriginal);
   const toggleFurigana = () => setShowFurigana(!showFurigana);
+  const requestChineseData = useCallback(() => {
+    if (!chineseDataAllowed) {
+      setChineseDataAllowed(true);
+      return;
+    }
+    if (chineseDownloadError) {
+      void refetchChinese();
+    }
+  }, [
+    chineseDataAllowed,
+    chineseDownloadError,
+    refetchChinese,
+    setChineseDataAllowed,
+  ]);
   const requestRussianData = useCallback(() => {
     if (!russianDataAllowed) {
       setRussianDataAllowed(true);
@@ -1063,6 +1142,12 @@ function App() {
             )}
             {!isPending &&
               !loadError &&
+              chineseLoadError &&
+              chineseDataAllowed && (
+                <span className="badge warn">중국어 데이터 오류</span>
+              )}
+            {!isPending &&
+              !loadError &&
               russianLoadError &&
               russianDataAllowed && (
               <span className="badge warn">러시아어 데이터 오류</span>
@@ -1154,6 +1239,9 @@ function App() {
                   {showHebrewColumn && (
                     <span>{hebrewData?.translation ?? "히브리어 원문"}</span>
                   )}
+                  {showChineseColumn && (
+                    <span>{chineseData?.translation ?? "중국어 성경"}</span>
+                  )}
                   {showRussianColumn && (
                     <span>
                       {russianData?.translation ?? "Русский синодальный"}
@@ -1177,6 +1265,9 @@ function App() {
               )}
               {hebrewLoadError && showHebrew && (
                 <p className="empty-state secondary">{hebrewLoadError}</p>
+              )}
+              {chineseLoadError && showChinese && (
+                <p className="empty-state secondary">{chineseLoadError}</p>
               )}
               {originalLoadError && showOriginal && (
                 <p className="empty-state secondary">{originalLoadError}</p>
@@ -1221,6 +1312,14 @@ function App() {
                           <span className="verse-number">{verse.number}</span>
                           <span className="verse-text">
                             {verse.hebrew || "—"}
+                          </span>
+                        </div>
+                      )}
+                      {showChineseColumn && (
+                        <div className="verse-column verse-column--secondary">
+                          <span className="verse-number">{verse.number}</span>
+                          <span className="verse-text">
+                            {verse.chinese || "—"}
                           </span>
                         </div>
                       )}
@@ -1354,12 +1453,18 @@ function App() {
         toggleKorean={toggleKorean}
         showEnglish={showEnglish}
         toggleEnglish={toggleEnglish}
+        showChinese={showChinese}
+        toggleChinese={toggleChinese}
         showRussian={showRussian}
         toggleRussian={toggleRussian}
         russianDataReady={russianDataReady}
         russianDownloadInProgress={russianDownloadInProgress}
         russianDownloadError={russianDownloadError}
         onDownloadRussian={requestRussianData}
+        chineseDataReady={chineseDataReady}
+        chineseDownloadInProgress={chineseDownloadInProgress}
+        chineseDownloadError={chineseDownloadError}
+        onDownloadChinese={requestChineseData}
         showJapanese={showJapanese}
         toggleJapanese={toggleJapanese}
         showItalian={showItalian}

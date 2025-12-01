@@ -4,6 +4,7 @@ import type { BibleData } from "../types/bible";
 const TRANSLATION_SOURCES = {
   kor: "/data/korean_bible.json",
   kjv: "/data/kjv_bible.json",
+  zh: "/data/chinese_bible.json",
   ja: "/data/japanese_bible.json",
   ita: "/data/italian_bible.json",
   rus: "/data/russian_bible.json",

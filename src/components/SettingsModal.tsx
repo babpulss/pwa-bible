@@ -3,6 +3,7 @@ import type { Theme } from "../types/bible";
 import {
   BASE_FONT_SCALE,
   FONT_STEP,
+  CHINESE_DATA_SIZE_LABEL,
   ITALIAN_DATA_SIZE_LABEL,
   JAPANESE_DATA_SIZE_LABEL,
   RUSSIAN_DATA_SIZE_LABEL,
@@ -29,6 +30,8 @@ type Props = {
   toggleKorean: () => void;
   showEnglish: boolean;
   toggleEnglish: () => void;
+  showChinese: boolean;
+  toggleChinese: () => void;
   showRussian: boolean;
   toggleRussian: () => void;
   showJapanese: boolean;
@@ -43,6 +46,10 @@ type Props = {
   russianDownloadInProgress: boolean;
   russianDownloadError: string | null;
   onDownloadRussian: () => void;
+  chineseDataReady: boolean;
+  chineseDownloadInProgress: boolean;
+  chineseDownloadError: string | null;
+  onDownloadChinese: () => void;
   japaneseDataReady: boolean;
   japaneseDownloadInProgress: boolean;
   japaneseDownloadError: string | null;
@@ -76,6 +83,8 @@ export function SettingsModal(props: Props) {
     toggleKorean,
     showEnglish,
     toggleEnglish,
+    showChinese,
+    toggleChinese,
     showOriginal,
     toggleOriginal,
     showRussian,
@@ -86,6 +95,10 @@ export function SettingsModal(props: Props) {
     toggleItalian,
     showFurigana,
     toggleFurigana,
+    chineseDataReady,
+    chineseDownloadInProgress,
+    chineseDownloadError,
+    onDownloadChinese,
     russianDataReady,
     russianDownloadInProgress,
     russianDownloadError,
@@ -306,6 +319,51 @@ export function SettingsModal(props: Props) {
           </div>
 
           <div className="settings__row">
+            <div className="settings__label">중국어 보기</div>
+            <div className="settings__control settings__control--column">
+              <div
+                style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}
+              >
+                <label className="toggle" aria-label="중국어 성경 번역 표시">
+                  <span className="toggle__switch">
+                    <input
+                      type="checkbox"
+                      checked={showChinese}
+                      onChange={toggleChinese}
+                      disabled={!chineseDataReady}
+                    />
+                    <span className="toggle__indicator" />
+                  </span>
+                  <span className="toggle__label">표시</span>
+                </label>
+              </div>
+              {!chineseDataReady && (
+                <>
+                  <div className="settings__action-row">
+                    <p className="settings__hint">
+                      중국어 성경 데이터({CHINESE_DATA_SIZE_LABEL})는 직접
+                      다운로드 후 사용할 수 있습니다.
+                    </p>
+                    <button
+                      type="button"
+                      className="settings__action-button"
+                      onClick={onDownloadChinese}
+                      disabled={chineseDownloadInProgress}
+                    >
+                      {chineseDownloadInProgress ? "다운로드 중…" : "다운로드"}
+                    </button>
+                  </div>
+                  {chineseDownloadError && (
+                    <p className="settings__hint settings__hint--error">
+                      {chineseDownloadError}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="settings__row">
             <div className="settings__label">러시아어 보기</div>
             <div className="settings__control settings__control--column">
               <div
@@ -514,6 +572,11 @@ export function SettingsModal(props: Props) {
               <p style={{ margin: "0.5rem 0 0" }}>
                 <strong>King James Version</strong>은 퍼블릭 도메인으로 누구나
                 자유롭게 이용하고 재배포할 수 있는 번역입니다.
+              </p>
+              <p style={{ margin: "0.5rem 0 0" }}>
+                <strong>和合本 (1919, 简体)</strong>은 1919년판 Chinese Union
+                Version(Simplified) 본문으로, 퍼블릭 도메인으로 공개되어
+                자유롭게 이용할 수 있습니다.
               </p>
               <p style={{ margin: "0.5rem 0 0" }}>
                 <strong>Синодальный перевод (RUSV)</strong>은 퍼블릭 도메인으로 누구나

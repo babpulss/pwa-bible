@@ -4,6 +4,7 @@ import {
   FONT_SCALE_KEY,
   SHOW_ENGLISH_KEY,
   SHOW_FURIGANA_KEY,
+  SHOW_CHINESE_KEY,
   SHOW_JAPANESE_KEY,
   SHOW_KOREAN_KEY,
   SHOW_RUSSIAN_KEY,
@@ -56,21 +57,25 @@ type TranslationPreferencesParams = {
   showKorean: boolean;
   showEnglish: boolean;
   showHebrew: boolean;
+  showChinese: boolean;
   showJapanese: boolean;
   showRussian: boolean;
   showItalian: boolean;
   showOriginal: boolean;
   showFurigana: boolean;
   setShowHebrew: (value: boolean) => void;
+  setShowChinese: (value: boolean) => void;
   setShowJapanese: (value: boolean) => void;
   setShowRussian: (value: boolean) => void;
   setShowItalian: (value: boolean) => void;
   setShowOriginal: (value: boolean) => void;
+  chineseDataAllowed: boolean;
   japaneseDataAllowed: boolean;
   russianDataAllowed: boolean;
   italianDataAllowed: boolean;
   hebrewDataAllowed: boolean;
   originalDataAllowed: boolean;
+  chineseDataReady: boolean;
   japaneseDataReady: boolean;
   russianDataReady: boolean;
   italianDataReady: boolean;
@@ -366,20 +371,24 @@ export const useTranslationPreferences = ({
   showKorean,
   showEnglish,
   showHebrew,
+  showChinese,
   showOriginal,
   showJapanese,
   showRussian,
   showItalian,
   showFurigana,
   setShowHebrew,
+  setShowChinese,
   setShowOriginal,
   setShowJapanese,
   setShowRussian,
   setShowItalian,
+  chineseDataAllowed,
   japaneseDataAllowed,
   italianDataAllowed,
   hebrewDataAllowed,
   originalDataAllowed,
+  chineseDataReady,
   japaneseDataReady,
   russianDataAllowed,
   russianDataReady,
@@ -387,11 +396,13 @@ export const useTranslationPreferences = ({
   hebrewDataReady,
   originalDataReady,
 }: TranslationPreferencesParams) => {
+  const chineseAllowedPrevRef = useRef(chineseDataAllowed);
   const japaneseAllowedPrevRef = useRef(japaneseDataAllowed);
   const russianAllowedPrevRef = useRef(russianDataAllowed);
   const italianAllowedPrevRef = useRef(italianDataAllowed);
   const hebrewAllowedPrevRef = useRef(hebrewDataAllowed);
   const originalAllowedPrevRef = useRef(originalDataAllowed);
+  const chineseAutoEnablePendingRef = useRef(false);
   const japaneseAutoEnablePendingRef = useRef(false);
   const russianAutoEnablePendingRef = useRef(false);
   const italianAutoEnablePendingRef = useRef(false);
@@ -423,6 +434,13 @@ export const useTranslationPreferences = ({
     if (typeof window === "undefined") {
       return;
     }
+    window.localStorage.setItem(SHOW_CHINESE_KEY, String(showChinese));
+  }, [showChinese]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
     window.localStorage.setItem(SHOW_JAPANESE_KEY, String(showJapanese));
   }, [showJapanese]);
 
@@ -446,6 +464,12 @@ export const useTranslationPreferences = ({
     }
     window.localStorage.setItem(SHOW_ORIGINAL_KEY, String(showOriginal));
   }, [showOriginal]);
+
+  useEffect(() => {
+    if (!chineseDataAllowed && showChinese) {
+      setShowChinese(false);
+    }
+  }, [chineseDataAllowed, showChinese, setShowChinese]);
 
   useEffect(() => {
     if (!japaneseDataAllowed && showJapanese) {
@@ -476,6 +500,16 @@ export const useTranslationPreferences = ({
       setShowOriginal(false);
     }
   }, [originalDataAllowed, showOriginal, setShowOriginal]);
+
+  useEffect(() => {
+    const prev = chineseAllowedPrevRef.current;
+    if (!prev && chineseDataAllowed) {
+      chineseAutoEnablePendingRef.current = true;
+    } else if (prev && !chineseDataAllowed) {
+      chineseAutoEnablePendingRef.current = false;
+    }
+    chineseAllowedPrevRef.current = chineseDataAllowed;
+  }, [chineseDataAllowed]);
 
   useEffect(() => {
     const prev = japaneseAllowedPrevRef.current;
@@ -526,6 +560,23 @@ export const useTranslationPreferences = ({
     }
     originalAllowedPrevRef.current = originalDataAllowed;
   }, [originalDataAllowed]);
+
+  useEffect(() => {
+    if (
+      chineseAutoEnablePendingRef.current &&
+      chineseDataAllowed &&
+      chineseDataReady &&
+      !showChinese
+    ) {
+      chineseAutoEnablePendingRef.current = false;
+      setShowChinese(true);
+    }
+  }, [
+    chineseDataAllowed,
+    chineseDataReady,
+    setShowChinese,
+    showChinese,
+  ]);
 
   useEffect(() => {
     if (

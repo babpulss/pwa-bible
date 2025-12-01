@@ -1,7 +1,7 @@
 # 오프라인 성경 PWA
 [https://pwa-bible.babpulss.workers.dev/](https://pwa-bible.babpulss.workers.dev/)
 
-광고나 부가 기능 없이 성경 본문을 빠르게 읽고 검색할 수 있도록 만든 Vite + React 기반 PWA입니다. 최초 접속 시 `public/data/korean_bible.json`(개역한글)과 `public/data/kjv_bible.json`(KJV)을 내려받아 `service worker`에 캐시하며, 설정에서 러시아어·원문(히브리어/헬라어)·일본어·이탈리아어 번역을 활성화하면 `public/data/russian_bible.json`(RUSV), `public/data/original_bible.json`(WLC + Byzantine Textform 2013), `public/data/japanese_bible.json`(口語訳聖書, 루비 포함), `public/data/italian_bible.json`(La Sacra Bibbia Riveduta 1927)도 동일하게 오프라인 캐시에 추가됩니다. 
+광고나 부가 기능 없이 성경 본문을 빠르게 읽고 검색할 수 있도록 만든 Vite + React 기반 PWA입니다. 최초 접속 시 `public/data/korean_bible.json`(개역한글)과 `public/data/kjv_bible.json`(KJV)을 내려받아 `service worker`에 캐시하며, 설정에서 러시아어·중국어·원문(히브리어/헬라어)·일본어·이탈리아어 번역을 활성화하면 `public/data/russian_bible.json`(RUSV), `public/data/chinese_bible.json`(和合本 1919, 简体), `public/data/original_bible.json`(WLC + Byzantine Textform 2013), `public/data/japanese_bible.json`(口語訳聖書, 루비 포함), `public/data/italian_bible.json`(La Sacra Bibbia Riveduta 1927)도 동일하게 오프라인 캐시에 추가됩니다. 
 
 ## 미리보기
 
@@ -20,9 +20,10 @@ https://github.com/user-attachments/assets/aba41127-33eb-457b-8967-4b4298673f30
 - 라이트/다크 테마: 상단 토글로 즉시 전환, 시스템 기본 테마 자동 인식
 - 검색 UI 최소화: 돋보기 버튼을 눌렀을 때만 검색창/결과 패널이 펼쳐져 본문에 집중 가능
 - 글꼴 크기 조절: 헤더의 `Aa±` 버튼으로 본문 글꼴 비율을 즉시 변경 및 저장
-- 번역 토글: 개역한글, KJV, 러시아어, 일본어, 이탈리아어를 번역별 스위치로 제어해 단일~사중 레이아웃으로 읽기
+- 번역 토글: 개역한글, KJV, 러시아어, 중국어, 일본어, 이탈리아어를 번역별 스위치로 제어해 단일~다중 레이아웃으로 읽기
 - 원문 병렬: 히브리어 구약(WLC) + 헬라어 신약(Byzantine Textform 2013) 원문을 단독 혹은 다른 번역과 함께 표시
 - 러시아어: Синодальный перевод(RUSV) 본문을 내려받아 병렬 번역으로 표시
+- 중국어: 和合本(1919, Simplified) 본문을 내려받아 병렬 번역으로 표시
 - 일본어 + 후리가나: 口語訳聖書(1955年版ルビ付き) 본문을 렌더링하고 후리가나(루비)를 별도 스위치로 숨김/표시
 - 오프라인 지원: PWA 설치 및 성경파일을 프리캐시
 - 가독성 향상 폰트: Noto Sans/Serif KR (WOFF2) 파일을 `public/fonts`에 포함해 완전 오프라인에서도 동일한 렌더링
@@ -45,6 +46,7 @@ npm run preview
 ## 데이터 출처 및 저작권 고지
 - 개역한글(대한성서공회): 대한성서공회가 제공한 공개 사용 안내 범위 내에서 자유롭게 이용할 수 있습니다. 실제 적용 시 최신 공지/FAQ를 확인해 주세요.
 - KJV (King James Version): 퍼블릭 도메인으로 자유롭게 사용 및 배포할 수 있습니다.
+- 和合本 (1919, Simplified): 1919년판 Chinese Union Version(간체) 본문으로 퍼블릭 도메인에 해당합니다.
 - Синодальный перевод (RUSV): 퍼블릭 도메인으로 누구나 자유롭게 이용하고 재배포할 수 있는 러시아어 번역입니다.
 - 口語訳聖書(1955年版ルビ付き): 퍼블릭 도메인으로 제공되는 일본어 번역으로, 루비(후리가나) 정보가 포함된 판본을 사용했습니다.
 - La Sacra Bibbia Riveduta 1927 (Italiano): Società Biblica di Ginevra가 배포한 Riveduta 1927 판본으로 퍼블릭 도메인에 해당합니다. 
@@ -60,6 +62,7 @@ frontend/
     data/korean_bible.json   # 개역한글 본문
     data/kjv_bible.json      # KJV 본문
     data/russian_bible.json  # 러시아어 Синодальный перевод 본문
+    data/chinese_bible.json  # 중국어 和合本(1919, Simplified) 본문
     data/japanese_bible.json # 일본어 口語訳 본문 (루비 포함)
     data/italian_bible.json  # 이탈리아어 Riveduta 1927 본문
     data/original_bible.json # 히브리어 WLC + 헬라어 Byzantine Textform 2013 합본
@@ -84,4 +87,4 @@ frontend/
 - 배포 시 저작권 고지와 라이선스 고지를 모든 사본 또는 실질적 부분에 포함해야 합니다.
 - 소프트웨어는 “있는 그대로(AS IS)” 제공되며, 어떠한 보증도 제공되지 않습니다.
 
-참고: 성경 데이터(개역한글, KJV, RUSV, 口語訳, La Sacra Bibbia Riveduta 1927, WLC, Byzantine Textform 2013)는 각각의 라이선스/공개 사용 안내에 따릅니다. 소스 코드의 MIT 라이선스는 애플리케이션 코드에 적용되며, 데이터 파일의 이용 조건은 위 “데이터 출처 및 저작권 고지” 섹션을 따릅니다. 자세한 내용은 저장소 루트의 LICENSE 파일을 참고하세요.
+참고: 성경 데이터(개역한글, KJV, 和合本 1919, RUSV, 口語訳, La Sacra Bibbia Riveduta 1927, WLC, Byzantine Textform 2013)는 각각의 라이선스/공개 사용 안내에 따릅니다. 소스 코드의 MIT 라이선스는 애플리케이션 코드에 적용되며, 데이터 파일의 이용 조건은 위 “데이터 출처 및 저작권 고지” 섹션을 따릅니다. 자세한 내용은 저장소 루트의 LICENSE 파일을 참고하세요.

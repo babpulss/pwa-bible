@@ -30,6 +30,7 @@ export type Theme = "light" | "dark" | "highContrast";
 export type TranslationId =
   | "kor"
   | "kjv"
+  | "zh"
   | "ja"
   | "ita"
   | "rus"

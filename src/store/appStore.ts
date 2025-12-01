@@ -20,11 +20,13 @@ type AppState = {
   showKorean: boolean;
   showEnglish: boolean;
   showHebrew: boolean;
+  showChinese: boolean;
   showJapanese: boolean;
   showRussian: boolean;
   showItalian: boolean;
   showOriginal: boolean;
   showFurigana: boolean;
+  chineseDataAllowed: boolean;
   japaneseDataAllowed: boolean;
   russianDataAllowed: boolean;
   italianDataAllowed: boolean;
@@ -63,6 +65,8 @@ type AppState = {
   toggleEnglish: () => void;
   setShowHebrew: (v: boolean) => void;
   toggleHebrew: () => void;
+  setShowChinese: (v: boolean) => void;
+  toggleChinese: () => void;
   setShowJapanese: (v: boolean) => void;
   toggleJapanese: () => void;
   setShowRussian: (v: boolean) => void;
@@ -73,6 +77,7 @@ type AppState = {
   toggleOriginal: () => void;
   setShowFurigana: (v: boolean) => void;
   toggleFurigana: () => void;
+  setChineseDataAllowed: (v: boolean) => void;
   setJapaneseDataAllowed: (v: boolean) => void;
   setRussianDataAllowed: (v: boolean) => void;
   setItalianDataAllowed: (v: boolean) => void;
@@ -115,11 +120,13 @@ export const useAppStore = create<AppState>()(
       showKorean: true,
       showEnglish: true,
       showHebrew: false,
+      showChinese: false,
       showJapanese: false,
       showRussian: false,
       showItalian: false,
       showOriginal: false,
       showFurigana: true,
+      chineseDataAllowed: false,
       japaneseDataAllowed: false,
       russianDataAllowed: false,
       italianDataAllowed: false,
@@ -179,6 +186,9 @@ export const useAppStore = create<AppState>()(
       setShowHebrew: (v: boolean) => set({ showHebrew: v }),
       toggleHebrew: () =>
         set((s: AppState) => ({ showHebrew: !s.showHebrew })),
+      setShowChinese: (v: boolean) => set({ showChinese: v }),
+      toggleChinese: () =>
+        set((s: AppState) => ({ showChinese: !s.showChinese })),
       setShowJapanese: (v: boolean) => set({ showJapanese: v }),
       toggleJapanese: () =>
         set((s: AppState) => ({ showJapanese: !s.showJapanese })),
@@ -194,6 +204,7 @@ export const useAppStore = create<AppState>()(
       setShowFurigana: (v: boolean) => set({ showFurigana: v }),
       toggleFurigana: () =>
         set((s: AppState) => ({ showFurigana: !s.showFurigana })),
+      setChineseDataAllowed: (v: boolean) => set({ chineseDataAllowed: v }),
       setJapaneseDataAllowed: (v: boolean) => set({ japaneseDataAllowed: v }),
       setRussianDataAllowed: (v: boolean) => set({ russianDataAllowed: v }),
       setItalianDataAllowed: (v: boolean) => set({ italianDataAllowed: v }),
@@ -229,11 +240,13 @@ export const useAppStore = create<AppState>()(
         showKorean: state.showKorean,
         showEnglish: state.showEnglish,
         showHebrew: state.showHebrew,
+        showChinese: state.showChinese,
         showJapanese: state.showJapanese,
         showRussian: state.showRussian,
         showItalian: state.showItalian,
         showOriginal: state.showOriginal,
         showFurigana: state.showFurigana,
+        chineseDataAllowed: state.chineseDataAllowed,
         japaneseDataAllowed: state.japaneseDataAllowed,
         russianDataAllowed: state.russianDataAllowed,
         italianDataAllowed: state.italianDataAllowed,
