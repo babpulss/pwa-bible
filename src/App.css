@@ -459,6 +459,7 @@
 }
 
 .chapter {
+  overflow-wrap: break-word; 
   background: var(--color-surface);
   border-radius: 16px;
   padding: 1rem;
